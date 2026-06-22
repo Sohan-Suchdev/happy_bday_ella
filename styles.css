@@ -1,0 +1,2389 @@
+/* ====================================================================
+   ELLA'S BDAY ADVENTURE — Phase 5 styles
+   Title screen + real art + map contrast pass + intros/instructions
+   ==================================================================== */
+
+:root {
+  --cream:           #fdf5f6;
+  --cream-warm:      #ffe8ee;
+  --neon-blue:       #00f0ff;
+  --neon-pink:       #ff007f;
+  --hot-pink:        #ff3ea0;
+  --dialogue-bg:     #f5e6c8;
+  --dialogue-border: #5c3d2e;
+  --dialogue-inset:  #d4b896;
+  --dark:            #1a1a1a;
+  /* Map — punched up for contrast vs the cream background */
+  --continent:       #8a6ab8;
+  --continent-edge:  #4a2e7a;
+  --continent-shade: #6d4ea0;
+  /* Hogwarts house colors */
+  --gryffindor-gold:   #d4af37;
+  --gryffindor-maroon: #740001;
+  --slytherin-green:   #1a472a;
+  --slytherin-silver:  #aaaaaa;
+  --ravenclaw-blue:    #2a3d6b;
+  --ravenclaw-bronze:  #946b2d;
+  --hufflepuff-yellow: #ecb939;
+  --hufflepuff-black:  #372e29;
+}
+
+/* ====================================================================
+   RESET + BASE
+==================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+  color: var(--dialogue-border);
+  overflow: hidden;
+  image-rendering: pixelated;
+  -webkit-font-smoothing: none;
+  user-select: none;
+}
+
+#game {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+img { image-rendering: pixelated; }
+
+/* ====================================================================
+   GENERIC PLACEHOLDER STYLES (search the codebase for these and swap)
+==================================================================== */
+.sprite-placeholder,
+.photo-placeholder {
+  font-family: 'Press Start 2P', monospace;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: rgba(0, 240, 255, 0.10);
+  border: 3px dashed var(--neon-pink);
+  color: var(--dialogue-border);
+  padding: 4px;
+}
+.photo-placeholder {
+  background: rgba(255, 0, 127, 0.10);
+  border-color: var(--neon-blue);
+  font-size: 11px;
+}
+
+/* ====================================================================
+   POLISH HELPERS — shake + pulse
+==================================================================== */
+@keyframes shake-light {
+  0%   { transform: translate(0, 0); }
+  20%  { transform: translate(-2px, 1px); }
+  40%  { transform: translate(2px, -1px); }
+  60%  { transform: translate(-2px, -1px); }
+  80%  { transform: translate(1px, 2px); }
+  100% { transform: translate(0, 0); }
+}
+.shake-light { animation: shake-light 0.18s linear; }
+
+@keyframes shake-hard {
+  0%   { transform: translate(0, 0); }
+  15%  { transform: translate(-6px, 2px); }
+  30%  { transform: translate(6px, -3px); }
+  45%  { transform: translate(-5px, -3px); }
+  60%  { transform: translate(5px, 3px); }
+  75%  { transform: translate(-3px, 1px); }
+  100% { transform: translate(0, 0); }
+}
+.shake-hard { animation: shake-hard 0.22s linear; }
+
+@keyframes hud-pulse {
+  0%   { transform: scale(1);    color: var(--neon-pink); }
+  40%  { transform: scale(1.35); color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
+  100% { transform: scale(1);    color: var(--neon-pink); }
+}
+.hud-value.pulse { animation: hud-pulse 0.32s ease-out; display: inline-block; }
+
+@keyframes portrait-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.04); }
+}
+
+/* ====================================================================
+   DIGICAM OVERLAY
+==================================================================== */
+.digicam-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.8s ease-in;
+}
+.digicam-overlay.active { opacity: 1; }
+
+.rec-indicator {
+  position: absolute;
+  top: 22px; left: 22px;
+  display: flex; align-items: center; gap: 10px;
+  color: #fff;
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  letter-spacing: 2px;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
+}
+.rec-circle {
+  width: 14px; height: 14px;
+  background: #ff2828;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #ff2828;
+  animation: rec-blink 1s infinite steps(2);
+}
+@keyframes rec-blink {
+  0%, 50%   { opacity: 1; }
+  51%, 100% { opacity: 0.15; }
+}
+
+.battery-indicator {
+  position: absolute;
+  top: 22px; right: 22px;
+  display: flex; align-items: center; gap: 8px;
+  color: #fff;
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
+}
+.battery-icon {
+  position: relative;
+  width: 38px; height: 18px;
+  border: 2px solid #fff;
+  display: flex; gap: 2px; padding: 2px;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+}
+.battery-icon::after {
+  content: '';
+  position: absolute;
+  right: -5px; top: 4px;
+  width: 3px; height: 8px;
+  background: #fff;
+}
+.battery-cell { flex: 1; background: #fff; }
+.battery-cell.empty { background: transparent; }
+
+.spec-text, .timestamp {
+  position: absolute;
+  color: #fff;
+  font-family: 'VT323', monospace;
+  font-size: 18px;
+  letter-spacing: 2px;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
+}
+.spec-text  { bottom: 22px; left: 22px;  }
+.timestamp  { bottom: 22px; right: 22px; }
+
+.crosshair {
+  position: absolute;
+  width: 32px; height: 32px;
+  border-color: #fff;
+  border-style: solid;
+  filter: drop-shadow(0 0 4px rgba(255,255,255,0.5));
+}
+.crosshair.tl { top: 60px;    left: 22px;   border-width: 3px 0 0 3px; }
+.crosshair.tr { top: 60px;    right: 22px;  border-width: 3px 3px 0 0; }
+.crosshair.bl { bottom: 60px; left: 22px;   border-width: 0 0 3px 3px; }
+.crosshair.br { bottom: 60px; right: 22px;  border-width: 0 3px 3px 0; }
+
+.scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.10) 0,
+    rgba(0, 0, 0, 0.10) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+}
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 55%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  pointer-events: none;
+}
+
+/* ====================================================================
+   SCENE 0 — TITLE SCREEN ("Ella's Bday Adventure" / PRESS START)
+==================================================================== */
+.title-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 700;
+  background: var(--cream);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  padding: 40px;
+  overflow: hidden;
+}
+.title-background {
+  /* Pinned to viewport. object-fit: contain shows the whole frame image
+     without cropping — letterbox bars filled by .title-screen's cream
+     background (#fdf5f6) so they blend in seamlessly on any aspect. */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  z-index: 0;
+  pointer-events: none;
+  background: #fdf5f6; /* fallback fill while img loads + behind letterbox */
+}
+.title-screen::before {
+  /* faint pixel-grid overlay on top of background art */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 0, 127, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 0, 127, 0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 1;
+}
+.title-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+.title-eyebrow {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  letter-spacing: 6px;
+  color: var(--dialogue-border);
+  opacity: 0.8;
+  margin-bottom: 4px;
+}
+.title-text {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 44px;
+  letter-spacing: 4px;
+  color: var(--neon-pink);
+  text-shadow:
+    6px 6px 0 var(--dialogue-border),
+    0 0 18px rgba(255, 0, 127, 0.55);
+  margin: 0;
+  line-height: 1.25;
+  animation: title-float 3s ease-in-out infinite;
+}
+@keyframes title-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+.title-subtitle {
+  font-family: 'VT323', monospace;
+  font-size: 26px;
+  letter-spacing: 4px;
+  color: var(--dialogue-border);
+  margin-bottom: 18px;
+}
+.start-button {
+  background: var(--neon-pink);
+  color: var(--cream);
+  border: 4px solid var(--dialogue-border);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 20px;
+  letter-spacing: 4px;
+  padding: 18px 32px;
+  cursor: pointer;
+  box-shadow: 6px 6px 0 var(--dialogue-border);
+  animation: start-pulse 1.3s ease-in-out infinite;
+  transition: filter 0.12s, transform 0.08s, box-shadow 0.08s;
+}
+.start-button:hover {
+  filter: brightness(1.15) saturate(1.1);
+  background: var(--hot-pink);
+}
+.start-button:active {
+  transform: translate(4px, 4px);
+  box-shadow: 2px 2px 0 var(--dialogue-border);
+}
+@keyframes start-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.06); }
+}
+.title-credit {
+  margin-top: 14px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  letter-spacing: 3px;
+  color: var(--dialogue-border);
+  opacity: 0.5;
+}
+
+.title-art {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.title-art img {
+  width: 220px;
+  max-width: 22vw;
+  height: auto;
+  animation: char-bob 2.2s ease-in-out infinite;
+}
+.title-art-right img { animation-delay: 0.6s; }
+@keyframes char-bob {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50%      { transform: translateY(-14px) rotate(1deg); }
+}
+
+/* Title screen clean fade-out on PRESS START — no flicker (was reading as buggy) */
+.title-screen.fading-out {
+  animation: title-fade-out 0.4s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes title-fade-out {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (max-width: 1100px) {
+  .title-text { font-size: 38px; letter-spacing: 3px; }
+}
+@media (max-width: 900px) {
+  .title-text { font-size: 30px; letter-spacing: 2px; }
+  .title-art img { width: 140px; }
+  .title-screen { gap: 20px; padding: 24px; }
+}
+
+/* ====================================================================
+   SCENE 1 — HUB MAP
+==================================================================== */
+.hub-map {
+  position: absolute;
+  inset: 0;
+  background-color: #d9ad7c;                       /* corkboard fallback color */
+  background-image: url('images/corkboard.png');   /* swap-in target */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.8s ease-in;
+  z-index: 100;
+}
+.hub-map.active  { display: block; }
+.hub-map.fade-in { opacity: 1; }
+
+/* Subtle vignette so the corkboard reads as physical, not flat */
+.hub-map::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(0,0,0,0.18) 100%);
+  pointer-events: none;
+}
+
+/* Polaroid board — fills the hub map; polaroids inside are absolute */
+.polaroid-board {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 22;
+}
+
+/* Polaroid pin — white card frame, drop shadow, rotated, pin-head dot */
+.polaroid-pin {
+  position: absolute;
+  width: clamp(86px, 9.5vw, 130px);
+  padding: 8px 8px 22px;
+  background: #fffaf0;
+  box-shadow:
+    0 6px 12px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(0, 0, 0, 0.08);
+  opacity: 0;
+  animation: polaroid-fade-in 0.55s ease-out forwards;
+  pointer-events: none;
+}
+.polaroid-pin::before {
+  /* Pinhead at the top of the polaroid */
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ff5a8a 0%, #c2003a 70%, #6e001f 100%);
+  box-shadow: 0 2px 3px rgba(0,0,0,0.45);
+  transform: translateX(-50%);
+}
+.polaroid-pin img,
+.polaroid-pin .polaroid-img-fallback {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  image-rendering: pixelated;
+}
+.polaroid-pin .polaroid-img-fallback {
+  background: rgba(0, 240, 255, 0.10);
+  border: 2px dashed var(--neon-pink);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--dialogue-border);
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4px;
+}
+.polaroid-pin .polaroid-label {
+  font-family: 'VT323', monospace;
+  font-size: clamp(13px, 1.4vw, 17px);
+  text-align: center;
+  color: var(--dialogue-border);
+  margin-top: 6px;
+  letter-spacing: 1px;
+}
+@keyframes polaroid-fade-in {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* Per-location placement on the corkboard. Edges + corners, rotated for that
+   "pinned snapshot" feel. Coordinates are over the .polaroid-board (= hub map). */
+.polaroid-pin.polaroid-morocco { top:  7%; left:  1.5%; transform: rotate(-6deg); }
+.polaroid-pin.polaroid-ghana   { bottom: 6%; left: 1.5%; transform: rotate(4deg);  }
+.polaroid-pin.polaroid-korea   { top:  7%; right: 1.5%; transform: rotate(5deg);  }
+.polaroid-pin.polaroid-nyc     { bottom: 6%; right: 1.5%; transform: rotate(-4deg); }
+.polaroid-pin.polaroid-greece  { bottom: 4%; left: 50%;  transform: translateX(-50%) rotate(2deg); }
+.polaroid-pin.polaroid-england { top: 12%;  left: 50%;  transform: translateX(-50%) rotate(-2deg); }
+
+/* Map container — purely viewport-width + aspect-ratio driven.
+   - NO max-height (was previously breaking the aspect-ratio on screens
+     where the height got clamped — that's what was stretching the image).
+   - aspect-ratio is set dynamically by JS (setMapAspectFromArt) from the
+     image's natural dimensions, and JS also caps the width so the
+     derived height stays within ~82vh. Falls back to 2:1 if JS hasn't
+     run yet (e.g. image not loaded). */
+.map-area {
+  position: absolute;
+  top: 9%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90vw;       /* JS overrides with min(90vw, ratio*82vh) at load */
+  aspect-ratio: 2 / 1;
+  pointer-events: none;
+}
+
+/* Swap target: set src on .world-map-image to a real map file (e.g.
+   images/world_map.png) and the SVG fallback hides automatically. */
+.world-map-image {
+  display: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;          /* container's aspect-ratio is set to match image */
+  image-rendering: pixelated;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 10px rgba(60, 40, 90, 0.30));
+}
+.world-map-image[src]:not([src=""]) {
+  display: block;
+}
+.world-map-image[src]:not([src=""]) ~ .world-map {
+  display: none;
+}
+
+.world-map {
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: pixelated;
+  shape-rendering: crispEdges;
+  filter: drop-shadow(0 4px 10px rgba(60, 40, 90, 0.30));
+}
+/* Per-cell rects (one <rect> per pixel) — each cell shows as a
+   chunky bordered square. Combined with the jagged outer outline
+   this reads as deliberate pixel-art. */
+.world-map .continents rect {
+  fill: var(--continent);
+  stroke: var(--continent-edge);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  shape-rendering: crispEdges;
+}
+
+/* Square radar-blip nodes — fluid 20-34px, scales with viewport */
+.node {
+  position: absolute;
+  width: clamp(20px, 2.4vmin, 34px);
+  height: clamp(20px, 2.4vmin, 34px);
+  background: var(--neon-pink);
+  border-radius: 0;
+  cursor: pointer;
+  z-index: 20;
+  pointer-events: auto;
+  box-shadow:
+    inset 0 0 0 3px #fff,
+    0 0 18px var(--neon-pink),
+    0 0 38px rgba(255, 0, 127, 0.7);
+  transform: translate(-50%, -50%);
+  transition: transform 0.15s ease-out, filter 0.15s, box-shadow 0.2s;
+  image-rendering: pixelated;
+  animation: node-throb 1.4s ease-in-out infinite;
+}
+@keyframes node-throb {
+  0%, 100% { box-shadow:
+              inset 0 0 0 3px #fff,
+              0 0 14px var(--neon-pink),
+              0 0 30px rgba(255, 0, 127, 0.6); }
+  50%      { box-shadow:
+              inset 0 0 0 3px #fff,
+              0 0 24px var(--neon-pink),
+              0 0 50px rgba(255, 0, 127, 0.95); }
+}
+.node::before,
+.node::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 0;
+  border: 4px solid var(--neon-pink);
+  animation: blip-ping 1.6s ease-out infinite;
+  pointer-events: none;
+}
+.node::after { animation-delay: 0.8s; }
+@keyframes blip-ping {
+  0%   { transform: scale(0.7); opacity: 1; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+.node:hover {
+  transform: translate(-50%, -50%) scale(1.4);
+  filter: brightness(1.4) saturate(1.2);
+}
+.node:active { transform: translate(-50%, -50%) scale(1.1); }
+
+.node-label {
+  position: absolute;
+  top: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--dialogue-border);
+  border: 2px solid var(--cream);
+  color: var(--cream);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  padding: 5px 9px;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s;
+}
+.node:hover .node-label { transform: translateX(-50%) scale(1.08); }
+
+.node.completed {
+  background: var(--neon-blue);
+  box-shadow:
+    inset 0 0 0 3px #fff,
+    0 0 18px var(--neon-blue),
+    0 0 38px rgba(0, 240, 255, 0.7);
+  animation: none;
+}
+.node.completed::before,
+.node.completed::after { border-color: var(--neon-blue); }
+.check-mark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  color: var(--dialogue-border);
+  pointer-events: none;
+}
+
+.node.locked {
+  background: #666;
+  box-shadow: inset 0 0 0 3px #aaa, 0 0 8px rgba(0, 0, 0, 0.5);
+  cursor: not-allowed;
+  filter: grayscale(0.7);
+  animation: none;
+}
+.node.locked::before, .node.locked::after { display: none; }
+.node.locked:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  filter: grayscale(0.5) brightness(1.1);
+}
+
+.lock-icon {
+  position: absolute;
+  /* Negative offsets scale with the icon size so the lock always sits
+     in the same relative spot above-right of the node */
+  top: calc(-1 * clamp(28px, 3.6vmin, 48px) * 0.7);
+  right: calc(-1 * clamp(28px, 3.6vmin, 48px) * 0.7);
+  width: clamp(28px, 3.6vmin, 48px);
+  height: clamp(28px, 3.6vmin, 48px);
+  object-fit: contain;
+  pointer-events: none;
+  display: none;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
+}
+.node.locked .lock-icon { display: block; }
+.lock-icon.unlocking {
+  display: block !important;
+  animation: lock-unlock-pop 1.2s ease-out forwards;
+}
+@keyframes lock-unlock-pop {
+  0%   { transform: scale(1)   rotate(0); }
+  30%  { transform: scale(1.5) rotate(-12deg); filter: brightness(1.5) drop-shadow(0 0 14px var(--neon-pink)); }
+  70%  { transform: scale(1.2) rotate(8deg);  filter: brightness(1.2); }
+  100% { transform: scale(0)   rotate(-20deg); opacity: 0; }
+}
+
+.node.boss-ready {
+  animation: boss-pulse 0.9s ease-in-out infinite;
+}
+@keyframes boss-pulse {
+  0%, 100% { box-shadow:
+              inset 0 0 0 3px #fff,
+              0 0 18px var(--neon-pink),
+              0 0 36px rgba(255, 0, 127, 0.7); }
+  50%      { box-shadow:
+              inset 0 0 0 3px #fff,
+              0 0 32px var(--neon-pink),
+              0 0 70px rgba(255, 0, 127, 1); }
+}
+
+/* Plane sprite — fluid sizing: 80px floor on tiny screens, ~10% of the
+   smaller viewport dimension, 150px ceiling on 4K. */
+.plane {
+  position: absolute;
+  width: clamp(80px, 11vmin, 150px);
+  height: clamp(80px, 11vmin, 150px);
+  object-fit: contain;
+  z-index: 50;
+  transition: top 1.1s cubic-bezier(.4,.0,.2,1), left 1.1s cubic-bezier(.4,.0,.2,1);
+  pointer-events: none;
+  top: 4%;
+  left: calc(95% - clamp(80px, 11vmin, 150px));
+  filter: drop-shadow(0 4px 4px rgba(0,0,0,0.25));
+}
+
+/* Progress tracker */
+.progress-tracker {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.78);
+  border: 2px solid var(--neon-blue);
+  padding: 8px 14px;
+  z-index: 30;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+}
+.progress-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: var(--neon-blue);
+  letter-spacing: 2px;
+  margin-right: 4px;
+  text-shadow: 0 0 4px var(--neon-blue);
+}
+.paw {
+  width: 28px; height: 28px;
+  object-fit: contain;
+  opacity: 0.32;
+  filter: grayscale(1) brightness(1.8);
+  transition: transform 0.2s, opacity 0.2s, filter 0.2s;
+}
+.paw.filled {
+  opacity: 1;
+  filter: none;
+  animation: paw-pop 0.5s ease-out;
+}
+@keyframes paw-pop {
+  0%   { transform: scale(0.5); filter: brightness(2); }
+  60%  { transform: scale(1.35); filter: brightness(1.4); }
+  100% { transform: scale(1);   filter: brightness(1); }
+}
+
+@media (max-width: 900px) {
+  .node-label { font-size: 7px; padding: 3px 6px; letter-spacing: 1px; }
+}
+
+/* ====================================================================
+   RESPONSIVE — adapt to common desktop/laptop heights so the minigame
+   stage + dialogue + back button all fit on screen.
+==================================================================== */
+@media (max-height: 820px) {
+  .minigame-stage { min-height: 520px; }
+  .cake-arena     { min-height: 440px; }
+  .nyc-arena      { min-height: 440px; }
+  .korea-grid {
+    grid-template-columns: repeat(5, 92px);
+    grid-template-rows: repeat(4, 82px);
+    gap: 9px;
+  }
+  .memory-card { width: 92px; height: 82px; }
+}
+@media (max-height: 740px) {
+  .minigame-stage { min-height: 460px; }
+  .cake-arena     { min-height: 380px; }
+  .nyc-arena      { min-height: 380px; }
+  .korea-grid {
+    grid-template-columns: repeat(5, 84px);
+    grid-template-rows: repeat(4, 74px);
+    gap: 8px;
+  }
+  .memory-card { width: 84px; height: 74px; }
+  .portrait    { width: 110px; height: 110px; }
+  .climax-title { font-size: clamp(24px, 5vw, 48px); }
+  .boss-banter { top: 64px; }
+}
+@media (max-height: 680px) {
+  .minigame-stage { min-height: 420px; }
+  .cake-arena     { min-height: 340px; }
+  .nyc-arena      { min-height: 340px; }
+  .korea-grid {
+    grid-template-columns: repeat(5, 76px);
+    grid-template-rows: repeat(4, 66px);
+    gap: 7px;
+  }
+  .memory-card { width: 76px; height: 66px; }
+  .portrait    { width: 96px; height: 96px; font-size: 8px; }
+  .dialogue-box { font-size: 24px; height: 20vh; min-height: 150px; }
+}
+@media (max-width: 1100px) {
+  .scene4-cast        { width: min(130px, 14vw); }
+  .scene4-cat         { width: clamp(72px, 8vw, 110px); height: clamp(72px, 8vw, 110px); }
+  .credits-track      { width: min(380px, 38vw); }
+  .credits-photo      { height: 110px; }
+}
+@media (max-width: 920px) {
+  .title-art img      { width: 140px; max-width: 18vw; }
+  .scene4-cast        { width: min(110px, 12vw); }
+  .scene4-cat         { width: clamp(64px, 7vw, 96px); height: clamp(64px, 7vw, 96px); }
+  .credits-track      { width: min(320px, 40vw); }
+}
+
+/* ====================================================================
+   SCENE 2 — MINI-GAME HOST SHELL
+==================================================================== */
+.minigame-screen {
+  position: absolute;
+  inset: 0;
+  background: var(--cream);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  z-index: 100;
+  padding: 20px;
+}
+.minigame-screen.active { display: flex; }
+
+.minigame-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 22px;
+  color: var(--neon-pink);
+  letter-spacing: 3px;
+  text-shadow: 3px 3px 0 var(--dialogue-border);
+  text-align: center;
+}
+.minigame-subtitle {
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+  color: var(--dialogue-border);
+  opacity: 0.7;
+  letter-spacing: 2px;
+  margin-top: -8px;
+  min-height: 1em;
+}
+
+.minigame-stage {
+  width: min(820px, 86vw);
+  min-height: 560px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 4px solid var(--dialogue-border);
+  box-shadow: 6px 6px 0 var(--dialogue-border);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.minigame-actions { display: flex; gap: 18px; }
+.btn {
+  background: var(--neon-blue);
+  border: 3px solid var(--dialogue-border);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding: 14px 22px;
+  cursor: pointer;
+  color: var(--dialogue-border);
+  box-shadow: 4px 4px 0 var(--dialogue-border);
+  transition: transform 0.08s, box-shadow 0.08s, filter 0.1s;
+}
+.btn:hover {
+  filter: brightness(1.18) saturate(1.15);
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--dialogue-border);
+}
+.btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0 var(--dialogue-border);
+  filter: brightness(0.95);
+}
+.btn.btn-pink { background: var(--neon-pink); color: #fff; }
+
+/* ====================================================================
+   PRE-GAME INTRO (plane fly-in + cat reveal, ~2.2s, click to skip)
+==================================================================== */
+.pre-game-intro {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--cream-warm) 0%, var(--cream) 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
+  cursor: pointer;
+  overflow: hidden;
+}
+.intro-skip-hint {
+  position: absolute;
+  bottom: 14px;
+  width: 100%;
+  text-align: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  letter-spacing: 3px;
+  color: var(--dialogue-border);
+  opacity: 0.45;
+}
+.intro-plane {
+  position: absolute;
+  width: 140px;
+  top: 28%;
+  left: -180px;
+  animation: plane-flyacross 2.2s ease-in-out forwards;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+}
+@keyframes plane-flyacross {
+  0%   { left: -180px; top: 30%; transform: scale(0.9); }
+  45%  { left: 45%;  top: 35%; transform: scale(1.5); }
+  100% { left: calc(100% + 100px); top: 26%; transform: scale(0.9); }
+}
+.intro-cat {
+  width: 220px;
+  max-width: 50%;
+  height: auto;
+  opacity: 0;
+  animation: cat-intro-reveal 2.2s ease-out forwards;
+}
+@keyframes cat-intro-reveal {
+  0%   { opacity: 0; transform: scale(0.4); }
+  55%  { opacity: 0; transform: scale(0.4); }
+  72%  { opacity: 1; transform: scale(1.18); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.intro-banner {
+  position: absolute;
+  top: 14%;
+  width: min(360px, 60%);
+  opacity: 0;
+  animation: intro-banner-pop 2.2s ease-out forwards;
+}
+@keyframes intro-banner-pop {
+  0%, 65%  { opacity: 0; transform: translateY(-30px) scale(0.8); }
+  82%      { opacity: 1; transform: translateY(0) scale(1.08); }
+  100%     { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ====================================================================
+   INSTRUCTION OVERLAY (shown before each game starts, [START] button)
+==================================================================== */
+.instruction-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, var(--cream-warm) 0%, var(--cream) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
+  padding: 24px;
+  overflow-y: auto;
+}
+.instruction-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 640px;
+  text-align: center;
+}
+.instruction-cat {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+  animation: portrait-breathe 2.5s ease-in-out infinite;
+}
+.instruction-eyebrow {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--neon-pink);
+  text-shadow: 0 0 6px rgba(255, 0, 127, 0.4);
+}
+.instruction-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 22px;
+  letter-spacing: 3px;
+  color: var(--dialogue-border);
+  text-shadow: 3px 3px 0 rgba(255, 0, 127, 0.20);
+}
+.instruction-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 4px;
+  font-family: 'VT323', monospace;
+  font-size: 24px;
+  color: var(--dialogue-border);
+  line-height: 1.35;
+  max-width: 540px;
+}
+.instruction-bullets li {
+  padding: 4px 0 4px 14px;
+  text-align: left;
+  position: relative;
+}
+.instruction-bullets li::before {
+  content: '>';
+  color: var(--neon-pink);
+  position: absolute;
+  left: -6px;
+  font-weight: bold;
+}
+.instruction-bullets .pack-list  { color: var(--neon-blue); font-weight: bold; letter-spacing: 1px; }
+.instruction-bullets .skip-list  { color: var(--neon-pink); font-weight: bold; letter-spacing: 1px; }
+.instruction-start {
+  margin-top: 10px;
+  font-size: 16px !important;
+  padding: 16px 28px !important;
+}
+
+/* ====================================================================
+   SHARED GAME HUD (consistent across all 4 games)
+==================================================================== */
+.game-hud {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+  background: rgba(92, 61, 46, 0.10);
+  border-bottom: 3px solid var(--dialogue-border);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.score-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.65);
+  border: 2px solid var(--dialogue-border);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--dialogue-border);
+  box-shadow: 2px 2px 0 var(--dialogue-border);
+}
+.score-chip .hud-label { opacity: 0.72; }
+.score-chip .hud-value {
+  color: var(--neon-pink);
+  font-size: 12px;
+  text-shadow: 0 0 6px rgba(255,0,127,0.5);
+  display: inline-block;
+  min-width: 1em;
+  text-align: right;
+}
+.score-chip .hud-value.warn {
+  color: #ff2828;
+  text-shadow: 0 0 8px #ff2828;
+}
+
+.game-body {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Boss banter — boss portrait + speech bubble during gameplay.
+   Pinned BELOW the HUD strip (~62px tall) so it doesn't overlap chips.
+   Non-blocking, fades after ~2.6s. Each game passes its own portrait. */
+.boss-banter {
+  position: absolute;
+  top: 72px;
+  right: 14px;
+  z-index: 30;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;
+  animation: banter-pop 2.7s ease-out forwards;
+}
+.boss-banter-portrait {
+  width: clamp(56px, 7vmin, 84px);
+  height: clamp(56px, 7vmin, 84px);
+  object-fit: contain;
+  border: 3px solid var(--dialogue-border);
+  background: var(--dialogue-bg);
+  box-shadow: 3px 3px 0 var(--dialogue-border);
+  image-rendering: pixelated;
+}
+.boss-banter-bubble {
+  background: var(--dialogue-bg);
+  border: 3px solid var(--dialogue-border);
+  border-radius: 6px;
+  padding: 10px 14px 12px 14px;
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+  color: var(--dialogue-border);
+  max-width: 220px;
+  box-shadow: 3px 3px 0 var(--dialogue-border);
+  position: relative;
+}
+.boss-banter-bubble::before {
+  /* Speech tail pointing toward the portrait */
+  content: '';
+  position: absolute;
+  bottom: 14px;
+  right: -10px;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-left: 10px solid var(--dialogue-border);
+}
+.boss-banter-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: 16px;
+  right: -6px;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 6px solid var(--dialogue-bg);
+}
+@keyframes banter-pop {
+  0%   { opacity: 0; transform: translateX(24px) scale(0.7); }
+  12%  { opacity: 1; transform: translateX(0)    scale(1.05); }
+  22%  { opacity: 1; transform: translateX(0)    scale(1); }
+  82%  { opacity: 1; transform: translateX(0)    scale(1); }
+  100% { opacity: 0; transform: translateX(16px) scale(0.95); }
+}
+
+/* In-game alert (used by Korea cat-pounce + Morocco "TOO EARLY") */
+.game-alert {
+  position: absolute;
+  top: 50%; left: 50%;
+  z-index: 50;
+  background: var(--neon-pink);
+  color: #fff;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-align: center;
+  padding: 14px 20px;
+  border: 3px solid var(--dialogue-border);
+  box-shadow: 4px 4px 0 var(--dialogue-border);
+  pointer-events: none;
+  animation: alert-pop 1.5s ease-out forwards;
+  max-width: 80%;
+}
+.game-alert.small {
+  font-size: 9px;
+  padding: 8px 14px;
+  top: 40%;
+  animation-duration: 0.9s;
+}
+@keyframes alert-pop {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.6) rotate(-3deg); }
+  20%  { opacity: 1; transform: translate(-50%, -50%) scale(1.15) rotate(2deg); }
+  40%  { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0); }
+  80%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+}
+
+/* ====================================================================
+   📍 GREECE — Whack-a-Cat (12-hole grid)
+==================================================================== */
+.whack-arena {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 12px;
+  padding: 16px;
+  align-items: stretch;
+  justify-items: stretch;
+}
+.whack-spot {
+  position: relative;
+  background-image: url('images/hole_spot.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.15s;
+  overflow: visible;
+  image-rendering: pixelated;
+}
+.whack-spot:hover { filter: brightness(1.12); transform: translateY(-2px); }
+.whack-cat {
+  position: absolute;
+  bottom: 12%;
+  left: 50%;
+  width: 78%;
+  height: 92%;
+  cursor: pointer;
+  z-index: 5;
+  transform: translateX(-50%);
+  animation: cat-pop 0.18s ease-out;
+}
+.whack-cat img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none; /* clicks land on the wrapper div */
+}
+.whack-cat:hover { filter: brightness(1.15); }
+.whack-cat:active { transform: translateX(-50%) scale(0.92); }
+@keyframes cat-pop {
+  0%   { transform: translateX(-50%) translateY(40px); opacity: 0; }
+  100% { transform: translateX(-50%) translateY(0);    opacity: 1; }
+}
+/* Bomb sprite in Greece Round 2 — same hole geometry as the cat but
+   uses bomb_icon.png with the fuse-pulse animation. */
+.whack-bomb {
+  position: absolute;
+  bottom: 12%;
+  left: 50%;
+  width: 78%;
+  height: 92%;
+  cursor: pointer;
+  z-index: 6;
+  transform: translateX(-50%);
+}
+.whack-bomb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+  animation: bomb-fuse 0.5s ease-in-out infinite alternate;
+}
+
+/* Big round-transition banner used by Greece (R1→R2, bomb reset) and NYC */
+.round-banner {
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  z-index: 45;
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(16px, 2.6vmin, 26px);
+  color: #fff;
+  letter-spacing: 3px;
+  text-align: center;
+  padding: 14px 22px;
+  background: var(--neon-pink);
+  border: 4px solid var(--dialogue-border);
+  box-shadow: 6px 6px 0 var(--dialogue-border);
+  text-shadow: 2px 2px 0 var(--dialogue-border);
+  pointer-events: none;
+  white-space: nowrap;
+  animation: round-banner-pop 1.7s ease-out forwards;
+}
+@keyframes round-banner-pop {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.6) rotate(-3deg); }
+  18%  { opacity: 1; transform: translate(-50%, -50%) scale(1.15) rotate(2deg); }
+  35%  { transform: translate(-50%, -50%) scale(1) rotate(0); }
+  82%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.92); }
+}
+
+.whack-miss {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 22px;
+  color: var(--neon-pink);
+  text-shadow: 0 0 10px var(--neon-pink);
+  pointer-events: none;
+  animation: whack-miss-anim 0.32s ease-out forwards;
+  z-index: 6;
+}
+@keyframes whack-miss-anim {
+  0%   { opacity: 1; transform: scale(1.6); }
+  100% { opacity: 0; transform: scale(0.8); }
+}
+
+/* ====================================================================
+   📍 GHANA — Suitcase Catch (falling items)
+==================================================================== */
+.ghana-arena {
+  position: relative;
+  flex: 1;
+  background: linear-gradient(180deg, rgba(0, 240, 255, 0.05) 0%, rgba(92, 61, 46, 0.06) 100%);
+  border: 2px solid var(--dialogue-border);
+  overflow: hidden;
+  cursor: crosshair;
+  user-select: none;
+  margin: 12px;
+}
+.ghana-catcher {
+  position: absolute;
+  bottom: 10px;
+  width: 170px;
+  height: 116px;
+  pointer-events: none;
+  transition: filter 0.12s, transform 0.12s;
+}
+.ghana-catcher img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.ghana-catcher.flash-good { filter: brightness(1.5) drop-shadow(0 0 14px var(--neon-blue)); transform: translateY(-4px); }
+.ghana-catcher.flash-bad  { filter: brightness(0.7) drop-shadow(0 0 14px var(--neon-pink)) hue-rotate(-30deg); transform: translateY(4px) rotate(-4deg); }
+
+.falling-item {
+  position: absolute;
+  width: 92px;
+  height: 92px;
+  pointer-events: none;
+}
+.falling-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 3px 4px rgba(0,0,0,0.3));
+}
+/* Bomb / golden / bonus-cat — same 92×92 hitbox as base items so the
+   collision math (which uses ITEM_SIZE = 92) matches what the player
+   sees. Visual distinction comes from drop-shadow + animation, not
+   from a different element size. */
+.falling-bomb {
+  animation: bomb-fuse 0.5s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 14px #ff2828);
+}
+@keyframes bomb-fuse {
+  0%   { transform: rotate(-3deg) scale(1);    filter: drop-shadow(0 0 12px #ff2828); }
+  100% { transform: rotate(3deg)  scale(1.08); filter: drop-shadow(0 0 22px #ff2828) drop-shadow(0 0 30px #ffd84d); }
+}
+
+.falling-golden {
+  animation: golden-shimmer 0.8s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 14px #ffd84d);
+}
+.golden-icon {
+  /* Still rendered as a styled placeholder div since there's no golden art yet */
+  width: 100%;
+  height: 100%;
+  border: 3px solid #ffd84d;
+  background: radial-gradient(circle at 30% 30%, #fff5a0, #d4af37);
+  color: var(--dialogue-border);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 12px rgba(255, 230, 100, 0.6);
+}
+@keyframes golden-shimmer {
+  0%   { transform: rotate(-2deg); filter: drop-shadow(0 0 12px #ffd84d); }
+  100% { transform: rotate(2deg);  filter: drop-shadow(0 0 22px #ffd84d) brightness(1.2); }
+}
+
+.falling-cat {
+  animation: bonus-cat-wiggle 0.9s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 10px var(--neon-pink));
+}
+@keyframes bonus-cat-wiggle {
+  0%   { transform: rotate(-6deg) translateX(-2px); }
+  100% { transform: rotate(6deg)  translateX(2px);  }
+}
+
+.falling-item.caught-good { animation: catch-good 0.3s ease-out forwards; }
+.falling-item.caught-bad  { animation: catch-bad 0.3s ease-out forwards; }
+@keyframes catch-good {
+  0%   { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 14px var(--neon-blue)); }
+  100% { transform: scale(0.4); opacity: 0; }
+}
+@keyframes catch-bad {
+  0%   { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 14px var(--neon-pink)); }
+  100% { transform: scale(0.4); opacity: 0; }
+}
+
+/* ====================================================================
+   📍 MOROCCO — Cake Stacker (Tetris-style, mouse-X + click soft-drop)
+==================================================================== */
+.morocco-body { padding: 12px; gap: 10px; position: relative; }
+.cake-arena {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  min-height: 480px;
+  background:
+    linear-gradient(180deg, rgba(244, 222, 230, 0.5) 0%, rgba(212, 175, 55, 0.1) 100%);
+  border: 2px solid var(--dialogue-border);
+  cursor: pointer;
+  overflow: hidden;
+  user-select: none;
+}
+.cake-arena-hint {
+  position: absolute;
+  top: 14%; left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: rgba(92, 61, 46, 0.55);
+  letter-spacing: 2px;
+  pointer-events: none;
+  text-align: center;
+  max-width: 80%;
+  line-height: 1.4;
+}
+/* Stack wrap — moving container holding base + stacked tiers. JS sets
+   translateX on this each frame; CSS doesn't animate the drift itself. */
+.cake-stack-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Cake_base.png — fixed at bottom-center of the wrap (and so moves with it) */
+.cake-base {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 200px;
+  height: 50px;
+  object-fit: contain;
+  object-position: bottom;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 1;
+}
+/* Active falling tier — sized to match the stacked-tier sprites */
+.cake-slider {
+  position: absolute;
+  width: 110px;
+  height: 42px;
+  object-fit: contain;
+  z-index: 4;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 4px rgba(0,0,0,0.3));
+  transition: filter 0.15s;
+}
+.cake-slider.toppling {
+  animation: cake-topple 0.9s ease-in forwards;
+}
+@keyframes cake-topple {
+  0%   { transform: rotate(0) translateX(0); }
+  100% { transform: rotate(80deg) translate(120px, 220px); opacity: 0.4; }
+}
+.cake-stack-area {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+.cake-tier-stacked {
+  position: absolute;
+  width: 110px;
+  height: 42px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+  animation: tier-land 0.25s ease-out;
+}
+@keyframes tier-land {
+  0%   { transform: translateY(-8px) scale(1.15); filter: brightness(1.5); }
+  100% { transform: translateY(0)   scale(1);    filter: brightness(1);   }
+}
+/* Center-line guide drawn behind the falling tier */
+.cake-center-guide {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  background: rgba(255, 0, 127, 0.35);
+  pointer-events: none;
+  z-index: 1;
+}
+.morocco-safe-badge {
+  position: absolute;
+  top: 50px;
+  right: 14px;
+  background: var(--neon-blue);
+  color: var(--dialogue-border);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 5px 9px;
+  border: 2px solid var(--dialogue-border);
+  box-shadow: 2px 2px 0 var(--dialogue-border);
+  z-index: 6;
+  display: none;
+  animation: paw-pop 0.5s ease-out;
+}
+.morocco-safe-badge.shown { display: block; }
+.cake-controls-hint {
+  position: absolute;
+  bottom: 6px; left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: rgba(92, 61, 46, 0.55);
+  pointer-events: none;
+  white-space: nowrap;
+}
+/* Wobble — kicks in past tier 5 via JS toggling .wobbling and setting --wobble-amp */
+.cake-stack-area {
+  transform-origin: bottom center;
+  --wobble-amp: 0deg;
+}
+.cake-stack-area.wobbling {
+  animation: stack-wobble 2.4s ease-in-out infinite;
+}
+@keyframes stack-wobble {
+  0%, 100% { transform: rotate(calc(var(--wobble-amp) * -1)); }
+  50%      { transform: rotate(var(--wobble-amp)); }
+}
+
+/* Sparkle bursts on great-landing combos */
+.morocco-sparkle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  box-shadow: 0 0 8px var(--neon-blue), 0 0 14px var(--neon-pink);
+  pointer-events: none;
+  z-index: 8;
+  transform: translate(-50%, -50%);
+  animation: sparkle-fly 0.7s ease-out forwards;
+  --sx: 0px;
+  --sy: 0px;
+}
+@keyframes sparkle-fly {
+  0%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--sx)), calc(-50% + var(--sy))) scale(0.4); }
+}
+
+.cake-complete-celebration {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  width: 240px;
+  height: auto;
+  z-index: 10;
+  animation: cake-complete-rise 0.9s ease-out forwards;
+  filter: drop-shadow(0 0 22px var(--neon-pink));
+  pointer-events: none;
+}
+@keyframes cake-complete-rise {
+  0%   { opacity: 0; transform: translate(-50%, 70px) scale(0.6); }
+  60%  { opacity: 1; transform: translate(-50%, 0)    scale(1.15); }
+  100% { opacity: 1; transform: translate(-50%, 0)    scale(1);    }
+}
+
+/* ====================================================================
+   📍 NEW YORK — Taxi Dash (lane-switch dodge/collect)
+==================================================================== */
+.nyc-arena {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  min-height: 480px;
+  border: 2px solid var(--dialogue-border);
+  overflow: hidden;
+  user-select: none;
+  background: #0d0d18;
+}
+.nyc-skyline {
+  /* Skyline now sits ABOVE the road as a top-anchored overlay (z 3),
+     so the road is free to fill the whole arena underneath it. */
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 30%;
+  background-image: url('images/nyc_skyline_bg.png');
+  background-size: cover;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  z-index: 3;
+  pointer-events: none;
+  animation: nyc-skyline-drift 60s linear infinite alternate;
+}
+@keyframes nyc-skyline-drift {
+  0%   { background-position: 40% bottom; }
+  100% { background-position: 60% bottom; }
+}
+/* NYC road — single-div infinite scroll, background-repeat: repeat-y,
+   animation drives background-position downward to simulate forward
+   motion.
+
+   SEAMLESS LOOP NOTE: background-position-y advances by --road-tile-h
+   per cycle (default 320px). For a PERFECTLY seamless loop, set this
+   to your image's actual tile height in CSS pixels (or any positive
+   multiple of it). Common pixel-art tile heights: 128, 192, 256, 320,
+   480, 512. If left at the default and your tile is a different size,
+   the scroll will still look continuous — there's just a tiny visual
+   "shift" at the loop point. Tune for clean. */
+/* NYC road — fills the ENTIRE arena (top:0 → bottom:0). The skyline
+   overlay sits on top of it at the upper 30%. Background tiles
+   vertically with repeat-y; animation loops by exactly one tile
+   height (1000px) for a seamless cycle. */
+.nyc-road {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url('images/nyc_street_bg.png');
+  background-size: 100% auto;
+  background-repeat: repeat-y;
+  background-position: center 0;
+  background-color: #2a2a32; /* fallback so no void if image fails to load */
+  animation: nyc-road-scroll 2.4s linear infinite;
+  z-index: 2;
+  will-change: background-position;
+}
+@keyframes nyc-road-scroll {
+  from { background-position-y: 0; }
+  to   { background-position-y: 1000px; }
+}
+.nyc-taxi {
+  position: absolute;
+  width: 84px;
+  height: 120px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  z-index: 6;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 4px rgba(0,0,0,0.45));
+  transition: filter 0.15s;
+}
+.nyc-taxi.hit {
+  animation: nyc-taxi-hit 0.28s ease-out;
+}
+@keyframes nyc-taxi-hit {
+  0%, 100% { transform: translateX(0); filter: drop-shadow(0 0 0 #ff2828); }
+  20%, 60% { transform: translateX(-6px); filter: drop-shadow(0 0 12px #ff2828); }
+  40%, 80% { transform: translateX(6px);  filter: drop-shadow(0 0 12px #ff2828); }
+}
+.nyc-obstacle, .nyc-collectible {
+  position: absolute;
+  object-fit: contain;
+  image-rendering: pixelated;
+  z-index: 5;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 3px rgba(0,0,0,0.5));
+}
+.nyc-collectible {
+  z-index: 4;
+  animation: nyc-collectible-spin 1.6s ease-in-out infinite alternate;
+}
+@keyframes nyc-collectible-spin {
+  0%   { transform: rotate(-8deg) scale(1); filter: drop-shadow(0 0 8px var(--neon-pink)); }
+  100% { transform: rotate(8deg)  scale(1.08); filter: drop-shadow(0 0 14px var(--neon-pink)); }
+}
+.nyc-fade { animation: nyc-fade-out 0.22s ease-out forwards; }
+@keyframes nyc-fade-out {
+  0%   { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+
+/* ====================================================================
+   📍 KOREA — Memory Match (5x4 grid, 10 pairs)
+==================================================================== */
+.korea-body { padding: 8px 12px; gap: 6px; }
+.korea-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 100px);
+  grid-template-rows: repeat(4, 88px);
+  gap: 10px;
+  justify-content: center;
+  align-content: center;
+  flex: 1;
+  padding: 6px 0;
+}
+.memory-card {
+  width: 100px;
+  height: 88px;
+  cursor: pointer;
+  perspective: 1200px;
+  position: relative;
+}
+.memory-card:hover .card-inner { filter: brightness(1.1); }
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.55s cubic-bezier(.5, .15, .25, 1);
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  will-change: transform;
+  transform: rotateY(0deg);
+}
+.memory-card.flipped .card-inner,
+.memory-card.matched .card-inner {
+  transform: rotateY(180deg);
+}
+.card-face {
+  position: absolute;
+  inset: 0;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+.card-back {
+  background-image: url('images/card_back_v2.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 2px solid var(--dialogue-border);
+  image-rendering: pixelated;
+  transform: rotateY(0deg);
+}
+/* Text-only drink placeholders (no art for 2 of the 10 drinks yet) */
+.drink-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 240, 255, 0.15);
+  border: 2px dashed var(--neon-pink);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  color: var(--dialogue-border);
+  letter-spacing: 2px;
+}
+.card-front {
+  transform: rotateY(180deg);
+  background: rgba(255, 255, 255, 0.92);
+  border: 3px solid var(--dialogue-border);
+  padding: 4px;
+}
+.card-front img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.memory-card.matched .card-front {
+  opacity: 0.7;
+  border-color: var(--neon-blue);
+  background: rgba(0, 240, 255, 0.30);
+}
+.memory-card.matched::after {
+  content: '✓';
+  position: absolute;
+  top: 4px; right: 6px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  color: var(--neon-blue);
+  text-shadow: 0 0 6px var(--neon-blue);
+  z-index: 2;
+}
+
+.memory-card.shuffling .card-inner {
+  animation: card-shuffle 0.7s ease-in-out;
+}
+@keyframes card-shuffle {
+  0%   { transform: rotateY(0)      scale(1)    translateY(0); }
+  20%  { transform: rotateY(180deg) scale(0.85) translateY(-15px); }
+  45%  { transform: rotateY(360deg) scale(0.7)  translateY(-25px); }
+  70%  { transform: rotateY(540deg) scale(0.85) translateY(-12px); }
+  100% { transform: rotateY(720deg) scale(1)    translateY(0); }
+}
+
+/* ====================================================================
+   📍 ENGLAND — The Sorting Gate
+==================================================================== */
+.england-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 12px;
+}
+.hogwarts-characters {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: 16px;
+  height: 110px;
+}
+.professor-cat {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  animation: portrait-breathe 2.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.55));
+}
+.sorting-hat {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 12px rgba(148, 107, 45, 0.7));
+  animation: hat-bob 1.6s ease-in-out infinite;
+}
+@keyframes hat-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+
+.trivia-panel {
+  flex: 1;
+  border: 3px solid var(--dialogue-border);
+  background: rgba(255, 255, 255, 0.7);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color 0.4s, box-shadow 0.4s, background 0.4s;
+  position: relative;
+}
+.trivia-panel.house-gryffindor {
+  border-color: var(--gryffindor-gold);
+  box-shadow: 0 0 20px var(--gryffindor-gold), inset 0 0 30px rgba(116, 0, 1, 0.10);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.10), rgba(116, 0, 1, 0.06));
+}
+.trivia-panel.house-slytherin {
+  border-color: var(--slytherin-green);
+  box-shadow: 0 0 20px var(--slytherin-green), inset 0 0 30px rgba(170, 170, 170, 0.10);
+  background: linear-gradient(135deg, rgba(26, 71, 42, 0.12), rgba(170, 170, 170, 0.08));
+}
+.trivia-panel.house-ravenclaw {
+  border-color: var(--ravenclaw-blue);
+  box-shadow: 0 0 20px var(--ravenclaw-blue), inset 0 0 30px rgba(148, 107, 45, 0.12);
+  background: linear-gradient(135deg, rgba(42, 61, 107, 0.12), rgba(148, 107, 45, 0.08));
+}
+.trivia-q-number {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--neon-pink);
+  text-shadow: 0 0 4px var(--neon-pink);
+}
+.trivia-panel.house-gryffindor .trivia-q-number { color: var(--gryffindor-maroon); text-shadow: 0 0 6px var(--gryffindor-gold); }
+.trivia-panel.house-slytherin  .trivia-q-number { color: var(--slytherin-green);   text-shadow: 0 0 6px var(--slytherin-silver); }
+.trivia-panel.house-ravenclaw  .trivia-q-number { color: var(--ravenclaw-blue);    text-shadow: 0 0 6px var(--ravenclaw-bronze); }
+.trivia-panel.house-hufflepuff {
+  border-color: var(--hufflepuff-yellow);
+  box-shadow:
+    0 0 20px var(--hufflepuff-yellow),
+    inset 0 0 30px rgba(55, 46, 41, 0.10);
+  background: linear-gradient(135deg, rgba(236, 185, 57, 0.14), rgba(55, 46, 41, 0.08));
+}
+.trivia-panel.house-hufflepuff .trivia-q-number { color: var(--hufflepuff-black); text-shadow: 0 0 6px var(--hufflepuff-yellow); }
+
+.trivia-question {
+  font-family: 'VT323', monospace;
+  font-size: 24px;
+  color: var(--dialogue-border);
+  line-height: 1.2;
+}
+.trivia-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+.trivia-option {
+  text-align: left;
+  font-size: 10px;
+  padding: 10px 14px;
+  width: 100%;
+  background: var(--cream);
+  box-shadow: 3px 3px 0 var(--dialogue-border);
+}
+.trivia-option:hover {
+  background: var(--neon-pink);
+  color: #fff;
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--dialogue-border);
+}
+.trivia-option.correct {
+  background: var(--neon-blue);
+  animation: option-correct 0.4s ease-out;
+}
+.trivia-option.wrong {
+  background: #ff3a3a;
+  color: #fff;
+  animation: option-wrong 0.4s ease-out;
+}
+@keyframes option-correct {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.06); filter: brightness(1.4); }
+  100% { transform: scale(1); }
+}
+@keyframes option-wrong {
+  0%, 100% { transform: translate(0, 0); }
+  25%      { transform: translate(-4px, 0); }
+  50%      { transform: translate(4px, 0); }
+  75%      { transform: translate(-2px, 0); }
+}
+
+.hogwarts-flash {
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  z-index: 950;
+  pointer-events: none;
+  animation: hogwarts-flash 0.9s ease-out forwards;
+}
+@keyframes hogwarts-flash {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+.hogwarts-gate {
+  flex: 1;
+  margin: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(212, 175, 55, 0.18);
+  border: 4px solid var(--gryffindor-gold);
+  color: var(--dialogue-border);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 16px;
+  letter-spacing: 4px;
+  animation: gate-glow 1.4s ease-in-out infinite;
+}
+.hogwarts-gate img {
+  width: min(70%, 360px);
+  height: auto;
+}
+@keyframes gate-glow {
+  0%, 100% { box-shadow: 0 0 30px var(--gryffindor-gold); }
+  50%      { box-shadow: 0 0 60px var(--gryffindor-gold), inset 0 0 40px rgba(212, 175, 55, 0.35); }
+}
+
+/* ====================================================================
+   WIN / LOSE VIEWS (shared, replaces the stage on win/lose)
+==================================================================== */
+.win-view, .lose-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 18px;
+  position: relative;
+}
+.win-banner, .lose-banner {
+  width: min(420px, 70%);
+  height: auto;
+  animation: banner-bounce 0.7s ease-out;
+}
+@keyframes banner-bounce {
+  0%   { transform: translateY(-50px) scale(0.5); opacity: 0; }
+  60%  { transform: translateY(8px) scale(1.12); opacity: 1; }
+  100% { transform: translateY(0) scale(1); }
+}
+.win-cat, .lose-cat {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  animation: defeated-bob 1.8s ease-in-out infinite;
+}
+@keyframes defeated-bob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50%      { transform: translateY(-4px) rotate(2deg); }
+}
+
+/* Reward-icon slot — shown during the victory moment.
+   Real art when meta.rewardIcon is set; styled placeholder otherwise. */
+.reward-icon-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: rgba(255, 245, 230, 0.7);
+  border: 3px solid var(--dialogue-border);
+  box-shadow: 4px 4px 0 var(--dialogue-border);
+  max-width: 80%;
+  animation: banner-bounce 0.7s ease-out 0.2s backwards;
+}
+.reward-icon-img {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.reward-icon-placeholder {
+  width: 110px;
+  height: 110px;
+  border: 3px dashed var(--neon-pink);
+  background: rgba(255, 0, 127, 0.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--dialogue-border);
+  text-align: center;
+}
+.reward-icon-caption {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--neon-pink);
+  text-shadow: 0 0 6px rgba(255, 0, 127, 0.5);
+}
+
+/* ====================================================================
+   SCENE 4 — CLIMAX PLACEHOLDER
+==================================================================== */
+/* ====================================================================
+   SCENE 4 — movie-poster layout (cats scattered L/R edges, photo
+   credits scrolling center, big HAPPY 19TH BIRTHDAY across top)
+==================================================================== */
+.scene4-screen {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 50%, #2a1b3a 0%, #0d0d18 80%);
+  display: none;
+  z-index: 100;
+  overflow: hidden;
+}
+.scene4-screen.active { display: block; }
+
+.confetti-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* --- TOP TITLE --- */
+.climax-title-row {
+  position: absolute;
+  top: 3%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 5;
+  pointer-events: none;
+}
+.climax-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(28px, 5.5vw, 64px);
+  letter-spacing: clamp(4px, 0.8vw, 8px);
+  color: var(--neon-pink);
+  text-shadow:
+    0 0 14px var(--neon-pink),
+    0 0 28px var(--neon-pink),
+    5px 5px 0 var(--neon-blue);
+  animation: climax-pulse 1.4s ease-in-out infinite;
+  line-height: 1.25;
+}
+.climax-title span { display: block; }
+@keyframes climax-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.04); }
+}
+
+/* --- LEFT / RIGHT CAST EDGES --- */
+.scene4-cast {
+  position: absolute;
+  top: 24%;
+  bottom: 11%;
+  width: min(150px, 16vw);
+  z-index: 4;
+  pointer-events: none;
+}
+.scene4-cast-left  { left: 1.5%; }
+.scene4-cast-right { right: 1.5%; }
+
+.scene4-cat {
+  position: absolute;
+  width: clamp(80px, 9vw, 130px);
+  height: clamp(80px, 9vw, 130px);
+  object-fit: contain;
+  cursor: pointer;
+  pointer-events: auto;
+  animation: scene4-bounce 1.1s ease-in-out infinite alternate;
+  transition: filter 0.15s, transform 0.15s;
+}
+.scene4-cat:hover {
+  filter: drop-shadow(0 0 16px var(--neon-pink)) brightness(1.15);
+  transform: scale(1.08);
+}
+.scene4-cat:active { transform: scale(0.95); }
+.scene4-cat.reacting { animation: scene4-reaction-wiggle 0.5s ease-out; }
+.scene4-cat-hero {
+  filter: drop-shadow(0 0 14px var(--neon-pink));
+}
+
+/* Scattered positions — different (top, left/right shift) per cat */
+.scatter-l1 { top:   1%; left:  -8%; }
+.scatter-l2 { top:  26%; left:  16%; }
+.scatter-l3 { top:  52%; left:  -4%; }
+.scatter-l4 { top:  76%; left:   8%; }
+.scatter-r1 { top:   0%; right:  4%; }
+.scatter-r2 { top:  28%; right: -10%; }
+.scatter-r3 { top:  54%; right:  10%; }
+.scatter-r4 { top:  78%; right: -6%; }
+
+@keyframes scene4-bounce {
+  0%   { transform: translateY(0)   rotate(-2deg); }
+  100% { transform: translateY(-16px) rotate(3deg); }
+}
+@keyframes scene4-reaction-wiggle {
+  0%   { transform: rotate(0) scale(1); }
+  25%  { transform: rotate(-12deg) scale(1.18); }
+  60%  { transform: rotate(10deg) scale(1.08); }
+  100% { transform: rotate(0) scale(1); }
+}
+
+/* --- CENTER CREDITS ROLL with photo placeholders --- */
+.credits-track {
+  position: absolute;
+  left: 50%;
+  top: 14%;
+  bottom: 14%;
+  transform: translateX(-50%);
+  width: min(440px, 42vw);
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 3;
+  mask-image: linear-gradient(180deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+}
+.credits-roll {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -100%;
+  text-align: center;
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  color: var(--cream);
+  letter-spacing: 2px;
+  line-height: 1.45;
+  animation: credits-scroll 45s linear infinite;
+  text-shadow: 0 0 10px rgba(0,0,0,0.7);
+}
+.credits-roll.replay { animation: credits-scroll 45s linear; }
+@keyframes credits-scroll {
+  0%   { bottom: -100%; opacity: 0; }
+  6%   { bottom: -88%;  opacity: 1; }
+  94%  { bottom: 100%;  opacity: 1; }
+  100% { bottom: 112%;  opacity: 0; }
+}
+.credits-line { padding: 2px 0; }
+.credits-spacer { height: 18px; }
+.credits-headline {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 16px;
+  color: var(--neon-pink);
+  text-shadow:
+    0 0 10px var(--neon-pink),
+    3px 3px 0 var(--neon-blue);
+  letter-spacing: 4px;
+  padding: 6px 0;
+}
+.credits-photo {
+  margin: 14px auto;
+  width: 86%;
+  height: 130px;
+  border: 3px dashed var(--neon-pink);
+  background: rgba(255, 0, 127, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--cream);
+  text-align: center;
+}
+.credits-caption {
+  font-style: italic;
+  color: var(--cream);
+  opacity: 0.85;
+  padding: 0 12px;
+}
+
+/* --- BOTTOM CONTROLS --- */
+.scene4-bottom {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: flex;
+  gap: 14px;
+}
+
+/* --- CAT REACTION SPEECH BUBBLE --- */
+.scene4-react-bubble {
+  position: absolute;
+  z-index: 7;
+  background: var(--dialogue-bg);
+  border: 3px solid var(--dialogue-border);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+  color: var(--dialogue-border);
+  max-width: 260px;
+  pointer-events: none;
+  display: none;
+  box-shadow: 3px 3px 0 var(--dialogue-border);
+}
+.scene4-react-bubble.show {
+  display: block;
+  animation: react-bubble-pop 1.8s ease-out forwards;
+}
+@keyframes react-bubble-pop {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.7); }
+  15%  { opacity: 1; transform: translateY(0)    scale(1.05); }
+  30%  { opacity: 1; transform: translateY(0)    scale(1);    }
+  80%  { opacity: 1; transform: translateY(0)    scale(1);    }
+  100% { opacity: 0; transform: translateY(-8px) scale(0.95); }
+}
+
+/* ====================================================================
+   DIALOGUE BOX
+==================================================================== */
+.dialogue-box {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(940px, 92%);
+  min-height: 170px;
+  height: 22vh;
+  background: var(--dialogue-bg);
+  border: 6px solid var(--dialogue-border);
+  border-radius: 6px;
+  box-shadow:
+    inset 0 0 0 3px var(--dialogue-inset),
+    0 6px 0 rgba(0, 0, 0, 0.35);
+  padding: 26px 28px 22px;
+  display: none;
+  gap: 20px;
+  z-index: 800;
+  cursor: pointer;
+  font-family: 'VT323', monospace;
+  font-size: 28px;
+  color: var(--dialogue-border);
+  line-height: 1.3;
+}
+.dialogue-box.active {
+  display: flex;
+  animation: dialogue-pop 0.16s ease-out;
+}
+@keyframes dialogue-pop {
+  0%   { opacity: 0; transform: translateX(-50%) scale(0.94); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1);    }
+}
+
+.speaker-tag {
+  position: absolute;
+  top: -20px;
+  left: 24px;
+  background: var(--dialogue-border);
+  color: var(--dialogue-bg);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding: 6px 14px;
+  border: 3px solid var(--dialogue-border);
+  border-radius: 4px;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.25);
+}
+
+/* Portrait — holds either an <img> (real art) or text placeholder.
+   Fluid sizing: smaller on cramped screens, generous on big ones. */
+.portrait {
+  width: clamp(96px, 14vmin, 160px);
+  height: clamp(96px, 14vmin, 160px);
+  flex-shrink: 0;
+  background: #fff4d6;
+  border: 3px solid var(--dialogue-border);
+  display: flex;
+  flex-direction: column;            /* image on top, caption strip below */
+  align-items: stretch;
+  justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: var(--dialogue-border);
+  text-align: center;
+  padding: 0;                        /* caption sits flush against the border */
+  letter-spacing: 1px;
+  overflow: hidden;
+  position: relative;
+}
+.portrait.has-text {
+  border-style: dashed;
+  background: #fff4d6;
+  padding: 4px;
+  justify-content: center;
+}
+.portrait img {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  object-fit: contain;
+  display: block;
+  padding: 4px;
+  animation: portrait-breathe 2.5s ease-in-out infinite;
+}
+
+/* Name + role caption strip under each portrait (Pokémon-style nameplate). */
+.portrait-caption {
+  flex-shrink: 0;
+  background: var(--dialogue-border);
+  color: #fff4d6;
+  padding: 3px 2px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  border-top: 2px solid var(--dialogue-border);
+  letter-spacing: 1px;
+  line-height: 1.05;
+}
+.portrait-caption .caption-name {
+  font-size: 9px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.portrait-caption .caption-role {
+  font-size: 6px;
+  opacity: 0.85;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.dialogue-text {
+  flex: 1;
+  padding-top: 6px;
+  padding-right: 30px;
+  word-break: break-word;
+}
+
+.dialogue-next {
+  position: absolute;
+  bottom: 10px;
+  right: 22px;
+  font-size: 32px;
+  color: var(--dialogue-border);
+  opacity: 0;
+}
+.dialogue-next.show {
+  opacity: 1;
+  animation: arrow-blink 0.7s steps(2) infinite;
+}
+@keyframes arrow-blink {
+  0%, 50%   { opacity: 1; transform: translateY(0); }
+  51%, 100% { opacity: 0; transform: translateY(2px); }
+}
+
+/* ====================================================================
+   TRANSITION WIPE
+==================================================================== */
+.wipe {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 900;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s steps(5);
+}
+.wipe.active { opacity: 1; }
+
+/* ====================================================================
+   DEBUG RESET
+==================================================================== */
+.debug-reset {
+  position: fixed;
+  bottom: 10px; left: 10px;
+  z-index: 1500;
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: 1px solid #555;
+  padding: 4px 8px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  opacity: 0.4;
+}
+.debug-reset:hover { opacity: 1; }

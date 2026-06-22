@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ella's Bday Adventure — Prototype</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+
+<!-- Styles -->
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div id="game">
+
+  <!-- ================================================================
+       SCENE 0 — TITLE SCREEN (entry point)
+       Cream/pink palette, "PRESS START" prompt. On click, flickers out
+       and reveals the hub map with the digicam overlay.
+  ================================================================ -->
+  <div id="title-screen" class="title-screen">
+    <!-- Full-bleed background art -->
+    <img class="title-background" src="images/title_background.png" alt="" />
+
+    <div class="title-art title-art-left">
+      <img src="images/rory_happy.png" alt="Rory the companion cat" />
+    </div>
+
+    <div class="title-content">
+      <div class="title-eyebrow">A GIFT FOR</div>
+      <h1 class="title-text">ELLA'S BDAY<br/>ADVENTURE</h1>
+      <div class="title-subtitle">— a 19th birthday quest —</div>
+      <button id="start-button" class="start-button">[ PRESS START ]</button>
+      <div class="title-credit">PROTOTYPE BUILD · OPERATION 19</div>
+    </div>
+
+    <div class="title-art title-art-right">
+      <img src="images/player_excited.png" alt="The birthday player" />
+    </div>
+  </div>
+
+  <!-- ================================================================
+       SCENE 1 — HUB MAP
+  ================================================================ -->
+  <div id="hub-map" class="hub-map">
+
+    <!-- Polaroid pinboard — populated at win-time by engine.js
+         (addPolaroidPin). Each polaroid pins to the corkboard background. -->
+    <div id="polaroid-board" class="polaroid-board"></div>
+
+    <!-- Progress tracker — 5 paw icons in play order:
+         Morocco → Ghana → Korea → NYC → Greece. -->
+    <div class="progress-tracker">
+      <div class="progress-label">PROGRESS</div>
+      <img class="paw" data-paw="morocco" src="images/progress_pawprint.png" alt="" />
+      <img class="paw" data-paw="ghana"   src="images/progress_pawprint.png" alt="" />
+      <img class="paw" data-paw="korea"   src="images/progress_pawprint.png" alt="" />
+      <img class="paw" data-paw="nyc"     src="images/progress_pawprint.png" alt="" />
+      <img class="paw" data-paw="greece"  src="images/progress_pawprint.png" alt="" />
+    </div>
+
+    <!-- Plane sprite — real art. JS swaps between idle and flying. -->
+    <img id="plane" class="plane" src="images/plane_idle.png" alt="" />
+
+    <!-- World map + radar-blip nodes -->
+    <div class="map-area">
+
+      <!-- HUB MAP BACKGROUND
+           Two-layer setup so swapping to real hand-generated art later
+           is a one-line change:
+             1. <img class="world-map-image">  — set src to your art file
+                (e.g. images/world_map.png) and CSS auto-hides the SVG.
+             2. <svg class="world-map">         — procedural pixel-grid
+                fallback used while map art is in progress. -->
+      <img class="world-map-image" id="map-art" src="images/world_map_background.png" alt="" />
+      <svg class="world-map" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet"
+           xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g class="continents"><!-- filled by engine.js --></g>
+      </svg>
+
+      <!-- ════════════════════════════════════════════════════════════
+           MAP PIN POSITIONS — MANUAL TWEAKS
+           ════════════════════════════════════════════════════════════
+           To move any pin on the world map, edit the inline
+                style="top: X%; left: Y%;"
+           attribute on the matching <div class="node" data-id="..."> below.
+
+             - top:   percentage from the TOP of the map
+                      (0% = top edge, 100% = bottom edge)
+             - left:  percentage from the LEFT of the map
+                      (0% = left edge, 100% = right edge)
+
+           The map container's aspect-ratio is matched to the actual
+           image at runtime, so these percentages map cleanly to the
+           painted countries underneath. Only touch the inline
+           top/left values — leave the data-id alone.
+           ════════════════════════════════════════════════════════════ -->
+      <div class="node" data-id="england" style="top: 40%; left: 42%;">
+        <div class="node-label">ENGLAND ?</div>
+        <div class="check-mark"></div>
+        <img class="lock-icon" src="images/lock_icon.png" alt="" />
+      </div>
+
+      <div class="node" data-id="greece" style="top: 45%; left: 53%;">
+        <div class="node-label">GREECE</div>
+        <div class="check-mark"></div>
+        <img class="lock-icon" src="images/lock_icon.png" alt="" />
+      </div>
+
+      <div class="node" data-id="morocco" style="top: 48%; left: 44%;">
+        <div class="node-label">MOROCCO</div>
+        <div class="check-mark"></div>
+        <img class="lock-icon" src="images/lock_icon.png" alt="" />
+      </div>
+
+      <div class="node" data-id="ghana" style="top: 55%; left: 45%;">
+        <div class="node-label">GHANA</div>
+        <div class="check-mark"></div>
+        <img class="lock-icon" src="images/lock_icon.png" alt="" />
+      </div>
+
+      <div class="node" data-id="korea" style="top: 38%; left: 90%;">
+        <div class="node-label">KOREA</div>
+        <div class="check-mark"></div>
+        <img class="lock-icon" src="images/lock_icon.png" alt="" />
+      </div>
+
+      <div class="node" data-id="nyc" style="top: 45%; left: 23%;">
+        <div class="node-label">NYC</div>
+        <div class="check-mark"></div>
+        <img class="lock-icon" src="images/lock_icon.png" alt="" />
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================================================================
+       SCENE 2 — MINI-GAME HOST
+       Each game's lifecycle now goes: pre-game-intro → instruction
+       overlay (with START button) → actual gameplay. All three live
+       inside the .minigame-stage container, layered as needed.
+  ================================================================ -->
+  <div id="minigame-screen" class="minigame-screen">
+    <div id="minigame-title" class="minigame-title">LOCATION</div>
+    <div id="minigame-subtitle" class="minigame-subtitle"></div>
+    <div id="minigame-stage" class="minigame-stage"></div>
+    <div class="minigame-actions">
+      <button id="back-button" class="btn">[ BACK TO MAP ]</button>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       SCENE 4 — CLIMAX (confetti, movie-poster cat layout,
+       photo-credits roll in the center, clickable cat reactions)
+  ================================================================ -->
+  <div id="scene4-screen" class="scene4-screen">
+    <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
+
+    <!-- TOP: huge birthday title -->
+    <div class="climax-title-row">
+      <div class="climax-title">
+        <span>HAPPY 19TH</span>
+        <span>BIRTHDAY</span>
+      </div>
+    </div>
+
+    <!-- LEFT EDGE characters, scattered vertically (Cartel: 3 cats) -->
+    <div class="scene4-cast scene4-cast-left">
+      <img src="images/dj_cat_defeated.png"     alt="" class="scene4-cat scatter-l1"
+           data-react="Fine. Take your playlist, Ella." />
+      <img src="images/baker_cat_defeated.png"  alt="" class="scene4-cat scatter-l2"
+           data-react="The cake is yours. Eat well." />
+      <img src="images/taxicat_defeated.png"    alt="" class="scene4-cat scatter-l3"
+           data-react="Drive safe, kid." />
+      <img src="images/wizard_cat_defeated.png" alt="" class="scene4-cat scatter-l4"
+           data-react="The threshold remembers your name." />
+    </div>
+
+    <!-- RIGHT EDGE characters, scattered vertically (Cartel: 2 cats + heroes) -->
+    <div class="scene4-cast scene4-cast-right">
+      <img src="images/stylist_cat_defeated.png"   alt="" class="scene4-cat scatter-r1"
+           data-react="You owe me a coffee, darling." />
+      <img src="images/bartender_cat_defeated.png" alt="" class="scene4-cat scatter-r2"
+           data-react="The bar is closed. Forever." />
+      <img src="images/rory_happy.png"             alt="" class="scene4-cat scene4-cat-hero scatter-r3"
+           data-react="We did it, Ella!" />
+      <img src="images/player_excited.png"         alt="" class="scene4-cat scene4-cat-hero scatter-r4"
+           data-react="Happy birthday to me." />
+    </div>
+
+    <!-- CENTER: photo-credits roll (text lines + photo placeholders interspersed) -->
+    <div class="credits-track">
+      <div class="credits-roll" id="credits-roll">
+        <div class="credits-line credits-headline">OPERATION 19</div>
+        <div class="credits-line credits-headline">BIRTHDAY BASH</div>
+        <div class="credits-spacer"></div>
+        <div class="credits-line">A GAME BY [YOUR NAME]</div>
+        <div class="credits-line">STARRING ELLA</div>
+        <div class="credits-spacer"></div>
+
+        <div class="credits-line">— THE CARTEL —</div>
+        <div class="credits-line">JINX &middot; THE DJ</div>
+        <div class="credits-line">COCO &middot; THE STYLIST</div>
+        <div class="credits-line">MOCHA &middot; THE BAKER</div>
+        <div class="credits-line">BOURBON &middot; THE BARTENDER</div>
+        <div class="credits-line">BRONX &middot; THE CABBIE</div>
+        <div class="credits-line">AMBROSE (ringleader) &middot; THE PROFESSOR</div>
+        <div class="credits-spacer"></div>
+
+        <div class="credits-line">— RECOVERED MEMORIES —</div>
+        <div class="credits-spacer"></div>
+
+        <div class="credits-photo">[ PHOTO: GREECE ]</div>
+        <div class="credits-caption">Jinx at the Greek isle</div>
+        <div class="credits-spacer"></div>
+
+        <div class="credits-photo">[ PHOTO: GHANA ]</div>
+        <div class="credits-caption">Coco's tower</div>
+        <div class="credits-spacer"></div>
+
+        <div class="credits-photo">[ PHOTO: KOREA ]</div>
+        <div class="credits-caption">Bourbon's bar</div>
+        <div class="credits-spacer"></div>
+
+        <div class="credits-photo">[ PHOTO: NEW YORK ]</div>
+        <div class="credits-caption">Bronx in Midtown traffic</div>
+        <div class="credits-spacer"></div>
+
+        <div class="credits-photo">[ PHOTO: MOROCCO ]</div>
+        <div class="credits-caption">Mocha's marketplace</div>
+        <div class="credits-spacer"></div>
+
+        <div class="credits-photo">[ PHOTO: ENGLAND ]</div>
+        <div class="credits-caption">The threshold opens</div>
+        <div class="credits-spacer"></div>
+
+        <div class="credits-line">— TEAM —</div>
+        <div class="credits-line">RORY &middot; HANDLER</div>
+        <div class="credits-line">ELLA &middot; AGENT</div>
+        <div class="credits-spacer"></div>
+
+        <div class="credits-line">SPECIAL THANKS</div>
+        <div class="credits-line">[ inside-jokes go here ]</div>
+        <div class="credits-line">the cats (for cooperating, eventually)</div>
+        <div class="credits-spacer"></div>
+        <div class="credits-spacer"></div>
+
+        <div class="credits-line credits-headline">HAPPY BIRTHDAY</div>
+        <div class="credits-line credits-headline">ELLA</div>
+        <div class="credits-spacer"></div>
+        <div class="credits-spacer"></div>
+      </div>
+    </div>
+
+    <!-- Bottom controls -->
+    <div class="scene4-bottom">
+      <button id="scene4-replay" class="btn">[ REPLAY CREDITS ]</button>
+      <button id="scene4-back" class="btn btn-pink">[ BACK TO MAP ]</button>
+    </div>
+
+    <!-- Speech bubble for cat reactions (one shared element, JS positions it) -->
+    <div id="scene4-react-bubble" class="scene4-react-bubble"></div>
+  </div>
+
+  <!-- ================================================================
+       DIALOGUE BOX
+       Portrait <div> is populated at runtime — either an <img> (real
+       art) or text placeholder, depending on the dialogue line.
+  ================================================================ -->
+  <div id="dialogue-box" class="dialogue-box">
+    <div id="speaker-tag" class="speaker-tag">SPEAKER</div>
+    <div id="portrait" class="portrait">[CHAR]</div>
+    <div id="dialogue-text" class="dialogue-text"></div>
+    <div id="dialogue-next" class="dialogue-next">&#9660;</div>
+  </div>
+
+  <!-- Transition wipe -->
+  <div id="wipe" class="wipe"></div>
+
+  <!-- ================================================================
+       DIGICAM OVERLAY — always on top, pointer-events: none
+  ================================================================ -->
+  <div id="digicam" class="digicam-overlay">
+    <div class="rec-indicator">
+      <div class="rec-circle"></div>
+      <div>REC</div>
+    </div>
+    <div class="battery-indicator">
+      <div class="battery-icon">
+        <div class="battery-cell"></div>
+        <div class="battery-cell"></div>
+        <div class="battery-cell"></div>
+        <div class="battery-cell empty"></div>
+      </div>
+      <div>87%</div>
+    </div>
+    <div class="crosshair tl"></div>
+    <div class="crosshair tr"></div>
+    <div class="crosshair bl"></div>
+    <div class="crosshair br"></div>
+    <div class="spec-text">ISO 400 &middot; f/2.8 &middot; 1/60</div>
+    <div class="timestamp">06&middot;21&middot;2026</div>
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+  </div>
+
+  <!-- Debug reset (delete when shipping) -->
+  <button id="debug-reset" class="debug-reset">[reset progress]</button>
+
+</div>
+
+<!-- engine.js declares shared globals & helpers; games.js populates
+     Games[id] and INSTRUCTIONS[id]. Load order matters. -->
+<script src="engine.js"></script>
+<script src="games.js"></script>
+</body>
+</html>
