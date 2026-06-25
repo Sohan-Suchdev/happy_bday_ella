@@ -416,11 +416,11 @@ img { image-rendering: pixelated; }
 /* Polaroid pin — white card frame, drop shadow, rotated, pin-head dot */
 .polaroid-pin {
   position: absolute;
-  width: clamp(86px, 9.5vw, 130px);
-  padding: 8px 8px 22px;
+  width: clamp(115px, 12vw, 175px);
+  padding: 9px 9px 24px;
   background: #fffaf0;
   box-shadow:
-    0 6px 12px rgba(0, 0, 0, 0.45),
+    0 7px 14px rgba(0, 0, 0, 0.48),
     0 0 0 1px rgba(0, 0, 0, 0.08);
   opacity: 0;
   animation: polaroid-fade-in 0.55s ease-out forwards;
@@ -430,22 +430,29 @@ img { image-rendering: pixelated; }
   /* Pinhead at the top of the polaroid */
   content: '';
   position: absolute;
-  top: -8px;
+  top: -9px;
   left: 50%;
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #ff5a8a 0%, #c2003a 70%, #6e001f 100%);
-  box-shadow: 0 2px 3px rgba(0,0,0,0.45);
+  box-shadow: 0 3px 4px rgba(0,0,0,0.45);
   transform: translateX(-50%);
 }
-.polaroid-pin img,
+.polaroid-pin img {
+  /* Real photos — natural aspect ratio, no cropping. The polaroid card
+     grows taller for portrait shots and shorter for landscape shots,
+     which is how a real photo wall looks anyway. */
+  width: 100%;
+  height: auto;
+  display: block;
+  image-rendering: auto;
+}
 .polaroid-pin .polaroid-img-fallback {
   width: 100%;
   aspect-ratio: 1 / 1;
-  object-fit: cover;
   display: block;
-  image-rendering: pixelated;
+  image-rendering: auto;
 }
 .polaroid-pin .polaroid-img-fallback {
   background: rgba(0, 240, 255, 0.10);
@@ -462,10 +469,10 @@ img { image-rendering: pixelated; }
 }
 .polaroid-pin .polaroid-label {
   font-family: 'VT323', monospace;
-  font-size: clamp(13px, 1.4vw, 17px);
+  font-size: clamp(15px, 1.55vw, 20px);
   text-align: center;
   color: var(--dialogue-border);
-  margin-top: 6px;
+  margin-top: 7px;
   letter-spacing: 1px;
 }
 @keyframes polaroid-fade-in {
@@ -786,14 +793,16 @@ img { image-rendering: pixelated; }
 @media (max-width: 1100px) {
   .scene4-cast        { width: min(130px, 14vw); }
   .scene4-cat         { width: clamp(72px, 8vw, 110px); height: clamp(72px, 8vw, 110px); }
-  .credits-track      { width: min(380px, 38vw); }
-  .credits-photo      { height: 110px; }
+  .credits-track      { width: min(1020px, 92vw); gap: 14px; }
+  .credits-col-photos { flex: 0 0 26%; }
 }
 @media (max-width: 920px) {
   .title-art img      { width: 140px; max-width: 18vw; }
   .scene4-cast        { width: min(110px, 12vw); }
   .scene4-cat         { width: clamp(64px, 7vw, 96px); height: clamp(64px, 7vw, 96px); }
-  .credits-track      { width: min(320px, 40vw); }
+  .credits-track      { width: min(820px, 94vw); gap: 10px; }
+  .credits-col-photos { flex: 0 0 24%; }
+  .credits-roll-text  { font-size: 18px; padding: 0 10px; }
 }
 
 /* ====================================================================
@@ -2104,43 +2113,51 @@ img { image-rendering: pixelated; }
   100% { transform: rotate(0) scale(1); }
 }
 
-/* --- CENTER CREDITS ROLL with photo placeholders --- */
+/* --- CENTER 3-COLUMN CREDITS (photos | text message | photos) --- */
 .credits-track {
   position: absolute;
   left: 50%;
-  top: 14%;
-  bottom: 14%;
+  top: 12%;
+  bottom: 13%;
   transform: translateX(-50%);
-  width: min(440px, 42vw);
+  width: min(1180px, 88vw);
   pointer-events: none;
-  overflow: hidden;
   z-index: 3;
-  mask-image: linear-gradient(180deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  display: flex;
+  gap: 18px;
 }
+.credits-col {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  mask-image: linear-gradient(180deg, transparent 0%, #000 9%, #000 91%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 9%, #000 91%, transparent 100%);
+}
+.credits-col-photos { flex: 0 0 28%; }
+.credits-col-text   { flex: 1 1 auto; }
+
 .credits-roll {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -100%;
-  text-align: center;
+  top: 0;
   font-family: 'VT323', monospace;
   font-size: 22px;
   color: var(--cream);
   letter-spacing: 2px;
   line-height: 1.45;
-  animation: credits-scroll 45s linear infinite;
   text-shadow: 0 0 10px rgba(0,0,0,0.7);
+  opacity: 0;             /* JS Web Animations API fades these in on start */
 }
-.credits-roll.replay { animation: credits-scroll 45s linear; }
-@keyframes credits-scroll {
-  0%   { bottom: -100%; opacity: 0; }
-  6%   { bottom: -88%;  opacity: 1; }
-  94%  { bottom: 100%;  opacity: 1; }
-  100% { bottom: 112%;  opacity: 0; }
-}
-.credits-line { padding: 2px 0; }
-.credits-spacer { height: 18px; }
+.credits-roll-text   { text-align: left;  padding: 0 20px; }
+.credits-roll-photos { text-align: center; }
+/* No CSS keyframes — see engine.js startCreditsScroll(). The JS animation
+   measures real content height so all photos scroll through regardless
+   of how tall the images render. */
+
+.credits-line     { padding: 2px 0; }
+.credits-spacer   { height: 18px; }
+.credits-spacer-xl{ height: 60px; }
 .credits-headline {
   font-family: 'Press Start 2P', monospace;
   font-size: 16px;
@@ -2151,13 +2168,68 @@ img { image-rendering: pixelated; }
   letter-spacing: 4px;
   padding: 6px 0;
 }
+
+/* Finale lines — birthday message, BIG and breathing. The huge size +
+   bigger spacers means each line lingers visibly in the viewport as
+   it scrolls through, which combined with the ease-out animation curve
+   creates the "slow, deliberate" finale feel. */
+.credits-finale-line {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(22px, 3.4vw, 38px);
+  color: var(--cream);
+  letter-spacing: 3px;
+  padding: 12px 0;
+  text-align: center;
+  line-height: 1.2;
+  text-shadow:
+    0 0 12px rgba(255, 0, 127, 0.55),
+    2px 2px 0 var(--neon-blue);
+}
+.credits-finale-name {
+  color: var(--neon-pink);
+  font-size: clamp(34px, 5vw, 56px);
+  text-shadow:
+    0 0 18px var(--neon-pink),
+    3px 3px 0 var(--neon-blue);
+}
+.credits-finale-message {
+  font-family: 'VT323', monospace;
+  font-size: clamp(22px, 2.4vw, 30px);
+  letter-spacing: 1px;
+  color: var(--cream);
+  text-shadow: 0 0 10px rgba(0,0,0,0.7);
+  padding: 8px 0;
+}
+.credits-finale-sig {
+  font-family: 'VT323', monospace;
+  font-size: clamp(20px, 2.2vw, 26px);
+  color: var(--cream);
+  opacity: 0.85;
+  font-style: italic;
+  padding: 8px 0;
+  text-shadow: 0 0 10px rgba(0,0,0,0.7);
+}
+.credits-finale-gap { height: 48px; }
+
+/* .credits-photo — real travel photos, NO cropping.
+   Width is constrained; height is auto so each photo keeps its natural
+   aspect ratio. Letting photos scale down naturally avoids any cover/cut. */
 .credits-photo {
-  margin: 14px auto;
-  width: 86%;
-  height: 130px;
-  border: 3px dashed var(--neon-pink);
+  display: block;
+  margin: 16px auto;
+  width: 94%;
+  height: auto;
+  max-height: 65vh;            /* safety cap so a 4000px-tall portrait won't dominate */
+  border: 3px solid var(--cream);
+  background: rgba(255, 244, 214, 0.06);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.45);
+  image-rendering: auto;
+}
+div.credits-photo {
+  /* legacy placeholder div look — only used if a placeholder slot remains */
+  border-style: dashed;
+  border-color: var(--neon-pink);
   background: rgba(255, 0, 127, 0.08);
-  display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Press Start 2P', monospace;
@@ -2165,12 +2237,16 @@ img { image-rendering: pixelated; }
   letter-spacing: 2px;
   color: var(--cream);
   text-align: center;
+  display: flex;
+  height: 170px;               /* placeholders keep fixed height */
 }
 .credits-caption {
   font-style: italic;
   color: var(--cream);
   opacity: 0.85;
   padding: 0 12px;
+  text-align: center;
+  font-size: 18px;
 }
 
 /* --- BOTTOM CONTROLS --- */

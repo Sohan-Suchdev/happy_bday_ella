@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(///wsl.localhost/Ubuntu/home/sohan/happy_bday/**)",
+      "Read(///wsl.localhost/Ubuntu/home/sohan/happy_bday/photos/**)"
+    ]
+  }
+}

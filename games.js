@@ -1595,7 +1595,7 @@ Games.england = function (stage) {
       house: 'ravenclaw',
       text: 'Is Arnav funnier than Ella?',
       options: [
-        'Yh',
+        'Yh', 
         'Yeah',
         'Yes'
       ],
@@ -1603,21 +1603,21 @@ Games.england = function (stage) {
     },
     {
       house: 'hufflepuff',
-      text: 'Will you finish JJK?',
+      text: 'What is Ella to us?',
       options: [
-        'No',
-        'Yes',
-        'Maybe'
+        'True Eve',
+        'True Chud', //correct
+        'A great friend'
       ],
       correct: 1
     },
     {
       house: 'gryffindor',
-      text: 'When did you first meet Sohan?',
+      text: 'How old is Ella?',
       options: [
-        'September 12th',
-        'September 9th',
-        'September 20th'
+        'Unc', //correct
+        '19',
+        'Nobody cares'
       ],
       correct: 0
     }

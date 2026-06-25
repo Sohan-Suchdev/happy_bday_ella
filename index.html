@@ -192,68 +192,148 @@
            data-react="Happy birthday to me." />
     </div>
 
-    <!-- CENTER: photo-credits roll (text lines + photo placeholders interspersed) -->
+    <!-- CENTER: movie-style 3-column credits.
+         LEFT  = photo column A   |   MIDDLE = text   |   RIGHT = photo column B
+         Photos scroll at constant pace alongside the message in the middle.
+         Splitting photos across both sides removes the "too many photos for
+         one column" problem and gives the text room to breathe. -->
+    <!-- [EDIT] CREDITS ROLL — middle column = all the text that scrolls up.
+         Edit any of the inner <div> contents below.
+           credits-line          regular text line
+           credits-headline      big bold text (for banners)
+           credits-spacer        empty vertical gap
+           credits-finale-line   slow, huge text (use only in the finale block)
+           credits-finale-gap    extra big gap between finale lines -->
     <div class="credits-track">
-      <div class="credits-roll" id="credits-roll">
-        <div class="credits-line credits-headline">OPERATION 19</div>
-        <div class="credits-line credits-headline">BIRTHDAY BASH</div>
-        <div class="credits-spacer"></div>
-        <div class="credits-line">A GAME BY [YOUR NAME]</div>
-        <div class="credits-line">STARRING ELLA</div>
-        <div class="credits-spacer"></div>
 
-        <div class="credits-line">— THE CARTEL —</div>
-        <div class="credits-line">JINX &middot; THE DJ</div>
-        <div class="credits-line">COCO &middot; THE STYLIST</div>
-        <div class="credits-line">MOCHA &middot; THE BAKER</div>
-        <div class="credits-line">BOURBON &middot; THE BARTENDER</div>
-        <div class="credits-line">BRONX &middot; THE CABBIE</div>
-        <div class="credits-line">AMBROSE (ringleader) &middot; THE PROFESSOR</div>
-        <div class="credits-spacer"></div>
+      <!-- LEFT COLUMN: photos (country photos + first batch of endcredits) -->
+      <div class="credits-col credits-col-photos credits-col-photos-left">
+        <div class="credits-roll credits-roll-photos" id="credits-roll-photos-left">
 
-        <div class="credits-line">— RECOVERED MEMORIES —</div>
-        <div class="credits-spacer"></div>
+          <!-- Country photos (with captions tying them to missions) -->
+          <img class="credits-photo" src="photos/greece.png" alt="" />
+          <div class="credits-spacer"></div>
 
-        <div class="credits-photo">[ PHOTO: GREECE ]</div>
-        <div class="credits-caption">Jinx at the Greek isle</div>
-        <div class="credits-spacer"></div>
+          <img class="credits-photo" src="photos/ghana.png" alt="" />
+          <div class="credits-spacer"></div>
 
-        <div class="credits-photo">[ PHOTO: GHANA ]</div>
-        <div class="credits-caption">Coco's tower</div>
-        <div class="credits-spacer"></div>
+          <img class="credits-photo" src="photos/korea.png" alt="" />
+          <div class="credits-spacer"></div>
 
-        <div class="credits-photo">[ PHOTO: KOREA ]</div>
-        <div class="credits-caption">Bourbon's bar</div>
-        <div class="credits-spacer"></div>
+          <img class="credits-photo" src="photos/morocco.png" alt="" />
+          <div class="credits-spacer"></div>
 
-        <div class="credits-photo">[ PHOTO: NEW YORK ]</div>
-        <div class="credits-caption">Bronx in Midtown traffic</div>
-        <div class="credits-spacer"></div>
+          <img class="credits-photo" src="photos/england.png" alt="" />
+          <div class="credits-spacer"></div>
 
-        <div class="credits-photo">[ PHOTO: MOROCCO ]</div>
-        <div class="credits-caption">Mocha's marketplace</div>
-        <div class="credits-spacer"></div>
+          <!-- Endcredits 1–5 -->
+          <img class="credits-photo" src="photos/endcredit1.png" alt="" />
+          <div class="credits-spacer"></div>
+          <img class="credits-photo" src="photos/endcredit2.png" alt="" />
+          <div class="credits-spacer"></div>
+          <img class="credits-photo" src="photos/endcredit3.png" alt="" />
+          <div class="credits-spacer"></div>
+          <img class="credits-photo" src="photos/endcredit4.png" alt="" />
+          <div class="credits-spacer"></div>
+          <img class="credits-photo" src="photos/endcredit5.png" alt="" />
+          <div class="credits-spacer"></div>
 
-        <div class="credits-photo">[ PHOTO: ENGLAND ]</div>
-        <div class="credits-caption">The threshold opens</div>
-        <div class="credits-spacer"></div>
-
-        <div class="credits-line">— TEAM —</div>
-        <div class="credits-line">RORY &middot; HANDLER</div>
-        <div class="credits-line">ELLA &middot; AGENT</div>
-        <div class="credits-spacer"></div>
-
-        <div class="credits-line">SPECIAL THANKS</div>
-        <div class="credits-line">[ inside-jokes go here ]</div>
-        <div class="credits-line">the cats (for cooperating, eventually)</div>
-        <div class="credits-spacer"></div>
-        <div class="credits-spacer"></div>
-
-        <div class="credits-line credits-headline">HAPPY BIRTHDAY</div>
-        <div class="credits-line credits-headline">ELLA</div>
-        <div class="credits-spacer"></div>
-        <div class="credits-spacer"></div>
+        </div>
       </div>
+
+      <!-- MIDDLE COLUMN: text -->
+      <div class="credits-col credits-col-text">
+        <div class="credits-roll credits-roll-text" id="credits-roll-text">
+
+          <!-- Header -->
+          <div class="credits-line credits-headline">OPERATION 19</div>
+          <div class="credits-line credits-headline">BIRTHDAY PARTY</div>
+          <div class="credits-spacer"></div>
+
+          <div class="credits-line">A GAME BY SOHAN AND ARNAV</div>
+          <div class="credits-line">STARRING ELLA</div>
+          <div class="credits-spacer"></div>
+
+          <!-- Cast: characters first (the "briefly" part) -->
+          <div class="credits-line">— THE CARTEL —</div>
+          <div class="credits-line">JINX &middot; THE DJ</div>
+          <div class="credits-line">COCO &middot; THE STYLIST</div>
+          <div class="credits-line">MOCHA &middot; THE BAKER</div>
+          <div class="credits-line">BOURBON &middot; THE BARTENDER</div>
+          <div class="credits-line">BRONX &middot; THE CABBIE</div>
+          <div class="credits-line">AMBROSE (ringleader) &middot; THE PROFESSOR</div>
+          <div class="credits-spacer"></div>
+
+          <div class="credits-line">— TEAM —</div>
+          <div class="credits-line">RORY &middot; HANDLER</div>
+          <div class="credits-line">ELLA &middot; AGENT</div>
+          <div class="credits-spacer"></div>
+
+          <div class="credits-line">— SPECIAL THANKS —</div>
+          <div class="credits-line">Ella's spam</div>
+          <div class="credits-line">Taysir, Josh, Tobi, Max RC, Zack, etc</div>
+          <div class="credits-line">the cats (for cooperating, eventually)</div>
+
+          <!-- Big breathing room before the finale lands -->
+          <div class="credits-spacer-xl"></div>
+          <div class="credits-spacer-xl"></div>
+
+          <!-- ════════════════════════════════════════════════════════════
+               THE FINALE — birthday message that scrolls SLOWLY.
+               These lines use credits-finale-line (big text + big padding)
+               and credits-finale-gap (extra-big spacer between them) so
+               they linger visibly as they pass through the viewport.
+               Add as many lines as you like.
+          ════════════════════════════════════════════════════════════ -->
+          <div class="credits-finale-line">HAPPY 19th</div>
+          <div class="credits-finale-line">BIRTHDAY</div>
+          <div class="credits-finale-line credits-finale-name">ELLA</div>
+          <div class="credits-finale-gap"></div>
+
+          <div class="credits-finale-line credits-finale-message">Happy birthday Ella! Congrats Unc on turning 19 yet being so smol and tiny. Maybe if you eat your greens and hit the gym you will finally grow.</div>
+          <div class="credits-finale-gap"></div>
+
+          <div class="credits-finale-line credits-finale-message">I hope you liked this game/card and it wasn't too difficult. Maybe more in the future.</div>
+          <div class="credits-finale-gap"></div>
+
+          <div class="credits-finale-line credits-finale-message">Enjoy your birthday and the rest of your time. You got that broski.</div>
+          <div class="credits-finale-gap"></div>
+
+          <div class="credits-finale-line credits-finale-sig">From ya boys Sohan and Arnav</div>
+          <!-- Trailing spacer so the final line lands above the bottom mask
+               fade when the credits stop scrolling at end. -->
+          <div class="credits-spacer-xl"></div>
+          <div class="credits-spacer-xl"></div>
+
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: photos (second batch of endcredits, 6 → 14) -->
+      <div class="credits-col credits-col-photos credits-col-photos-right">
+        <div class="credits-roll credits-roll-photos" id="credits-roll-photos-right">
+
+          <img class="credits-photo" src="photos/endcredit6.png"   alt="" />
+          <div class="credits-spacer"></div>
+          <img class="credits-photo" src="photos/endcredit7.png"   alt="" />
+          <div class="credits-spacer"></div>
+          <img class="credits-photo" src="photos/endcredits8.png"  alt="" />
+          <div class="credits-spacer"></div>
+          <img class="credits-photo" src="photos/endcredits9.png"  alt="" />
+          <div class="credits-spacer"></div>
+          <img class="credits-photo" src="photos/endcredits10.png" alt="" />
+          <div class="credits-spacer"></div>
+          <img class="credits-photo" src="photos/endcredits11.png" alt="" />
+          <div class="credits-spacer"></div>
+          <img class="credits-photo" src="photos/endcredits12.png" alt="" />
+          <div class="credits-spacer"></div>
+          <img class="credits-photo" src="photos/endcredits13.png" alt="" />
+          <div class="credits-spacer"></div>
+          <img class="credits-photo" src="photos/endcredit14.png"  alt="" />
+          <div class="credits-spacer"></div>
+
+        </div>
+      </div>
+
     </div>
 
     <!-- Bottom controls -->

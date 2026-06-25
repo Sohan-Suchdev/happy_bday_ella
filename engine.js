@@ -408,16 +408,11 @@ function addPolaroidPin(id) {
   pin.className = 'polaroid-pin polaroid-' + id;
   pin.dataset.pin = id;
 
-  // Inner art: use the location's reward icon if it exists, otherwise
-  // a labeled placeholder so the slot is still clearly present.
-  var artHtml;
-  if (meta.rewardIcon) {
-    artHtml = '<img src="images/' + meta.rewardIcon + '.png" alt="" />';
-  } else {
-    artHtml = '<div class="polaroid-img-fallback">[' +
-              (meta.stolenItem || (id + '').toUpperCase()) + ']</div>';
-  }
-  pin.innerHTML = artHtml +
+  // Inner art: real travel photo from /photos folder.
+  // Filename map: lowercase id + .png, EXCEPT NYC which is uppercase.
+  var photoFile = (id === 'nyc') ? 'NYC' : id;
+  pin.innerHTML =
+    '<img src="photos/' + photoFile + '.png" alt="" />' +
     '<div class="polaroid-label">' + (LOCATION_NAMES[id] || id) + '</div>';
   board.appendChild(pin);
 }
@@ -903,6 +898,96 @@ function showScene4() {
   scene4Screen.classList.add('active');
   startSceneFourConfetti();
   wireSceneFourInteractions();
+  // Force a fresh start of the credit rolls every time Scene 4 opens
+  // (otherwise re-entering via /loop, replay, or back-to-map+win sequence
+  // could leave the animation in a finished state).
+  restartCreditsScroll();
+}
+
+/* --------------------------------------------------------------------
+   CREDITS SCROLL — JS-driven via Web Animations API.
+   Measures real content height at runtime so the full content (no
+   matter how tall) always scrolls through the viewport. The animation
+   translates the roll from "fully below the column" to "fully above
+   the column".
+
+   Tweak overall pacing here:
+     - TEXT_MS:  total ms for the left text column (ease-out so the
+                 birthday-message tail lingers)
+     - PHOTOS_MS: total ms for the right photo column (linear, so each
+                  photo gets equal time on screen)
+-------------------------------------------------------------------- */
+var CREDITS_TEXT_MS   = 145000;  // 145s — slow birthday-message tail (ease-out)
+var CREDITS_PHOTOS_MS =  95000;  //  95s — both photo columns. Photos finish ~50s
+                                 //         before text so the finale message
+                                 //         lingers alone in the middle.
+
+function restartCreditsScroll() {
+  startOneCreditRoll('credits-roll-text',         CREDITS_TEXT_MS,
+                     'cubic-bezier(0.22, 0.55, 0.32, 1)');
+  startOneCreditRoll('credits-roll-photos-left',  CREDITS_PHOTOS_MS, 'linear');
+  startOneCreditRoll('credits-roll-photos-right', CREDITS_PHOTOS_MS, 'linear');
+}
+
+function startOneCreditRoll(id, durationMs, easing) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var parent = el.parentElement;
+  if (!parent) return;
+
+  // Cancel any in-flight animation so replay is clean.
+  if (el._creditAnim) {
+    try { el._creditAnim.cancel(); } catch (e) {}
+    el._creditAnim = null;
+  }
+
+  // Wait for any <img>s inside this roll to finish loading — otherwise
+  // scrollHeight is computed before the photos have intrinsic dimensions
+  // and the animation would scroll past empty space.
+  whenImagesReady(el, function () {
+    var contentH = el.scrollHeight;
+    var parentH  = parent.clientHeight;
+    var startY   = parentH;          // bottom of viewport — content fully below
+
+    // STOP-AT-END: don't let the last lines scroll off the top. Park the
+    // content so the bottom of the roll sits at the bottom of the column —
+    // i.e. the last few lines (= birthday-message finale on the text
+    // column, or the last photo on a photo column) stay visible after the
+    // scroll finishes. If the content is shorter than the viewport, just
+    // anchor at top.
+    var endY;
+    if (contentH > parentH) {
+      endY = -(contentH - parentH);  // bottom of content at bottom of column
+    } else {
+      endY = 0;
+    }
+
+    el._creditAnim = el.animate(
+      [
+        { transform: 'translateY(' + startY + 'px)', opacity: 0, offset: 0 },
+        { transform: 'translateY(' + (startY - 60) + 'px)', opacity: 1, offset: 0.03 },
+        { transform: 'translateY(' + endY + 'px)', opacity: 1, offset: 1 }
+      ],
+      { duration: durationMs, easing: easing, fill: 'forwards' }
+    );
+  });
+}
+
+function whenImagesReady(rootEl, cb) {
+  var imgs = rootEl.querySelectorAll('img');
+  var pending = 0;
+  imgs.forEach(function (img) {
+    if (!(img.complete && img.naturalWidth > 0)) {
+      pending++;
+      var done = function () {
+        pending--;
+        if (pending === 0) requestAnimationFrame(cb);
+      };
+      img.addEventListener('load',  done, { once: true });
+      img.addEventListener('error', done, { once: true });
+    }
+  });
+  if (pending === 0) requestAnimationFrame(cb);
 }
 
 /* Cat-click reactions + replay-credits button. Wires once per session. */
@@ -944,14 +1029,7 @@ function wireSceneFourInteractions() {
 
   var replayBtn = document.getElementById('scene4-replay');
   if (replayBtn) {
-    replayBtn.addEventListener('click', function () {
-      var roll = document.getElementById('credits-roll');
-      if (!roll) return;
-      // Restart the credits scroll animation by re-applying it
-      roll.style.animation = 'none';
-      void roll.offsetWidth;
-      roll.style.animation = '';
-    });
+    replayBtn.addEventListener('click', restartCreditsScroll);
   }
 }
 
@@ -1191,3 +1269,97 @@ setMapAspectFromArt();
 buildPixelWorldMap();
 updateProgressTracker();
 updateNodeStates();
+
+/* ════════════════════════════════════════════════════════════════════
+   🛠 DEV SCENE JUMPER — skip directly to a scene/game via URL params
+   ════════════════════════════════════════════════════════════════════
+   Append one of these to the URL when opening the page:
+
+       ?scene=credits     → jump straight to the end credits scene
+       ?scene=hub         → skip the title, go to the hub (no briefing)
+       ?game=morocco      → start Morocco (1st game)
+       ?game=ghana        → start Ghana, with Morocco pre-completed
+       ?game=korea        → start Korea, with Morocco+Ghana pre-completed
+       ?game=nyc          → start NYC,   with prereqs pre-completed
+       ?game=greece       → start Greece (last side game), all prereqs done
+       ?game=england      → start the England boss, all 5 sides pre-completed
+
+   Examples (local file):
+       file:///.../index.html?scene=credits
+       file:///.../index.html?game=korea
+
+   Examples (live server):
+       http://localhost:8000/?scene=credits
+       http://localhost:8000/?game=england
+
+   Plain http://localhost:8000/  (no params) = normal play from title.
+═══════════════════════════════════════════════════════════════════ */
+function applyDevSceneFromUrl() {
+  var params = new URLSearchParams(window.location.search);
+  var scene  = params.get('scene');
+  var game   = params.get('game');
+  if (!scene && !game) return;
+
+  // Hide title screen no matter what dev-shortcut we took.
+  titleScreen.style.display = 'none';
+
+  function completeAll() {
+    QUESTS.forEach(function (q) {
+      State.unlocked[q]  = true;
+      State.completed[q] = true;
+    });
+    State.unlocked.england  = true;
+    State.completed.england = true;
+  }
+
+  function completeBefore(target) {
+    var idx = QUESTS.indexOf(target);
+    if (idx < 0) return;
+    for (var i = 0; i < idx; i++) {
+      State.unlocked[QUESTS[i]]  = true;
+      State.completed[QUESTS[i]] = true;
+    }
+    State.unlocked[target] = true;
+  }
+
+  // --- ?scene=credits → jump straight to the climax/credits
+  if (scene === 'credits') {
+    completeAll();
+    updateProgressTracker();
+    updateNodeStates();
+    // Also drop all polaroids on the (hidden) corkboard so if user
+    // hits "back to map" from credits, the board reflects the run.
+    ['morocco','ghana','korea','nyc','greece','england'].forEach(addPolaroidPin);
+    showScene4();
+    return;
+  }
+
+  // --- ?scene=hub → skip title + opening briefing, land on hub
+  if (scene === 'hub') {
+    enterHubMap(false);
+    return;
+  }
+
+  // --- ?game=ID → jump into a specific minigame
+  if (game) {
+    if (game === 'england') {
+      completeAll();
+      State.completed.england = false;     // we still want to PLAY england
+    } else {
+      completeBefore(game);
+    }
+    updateProgressTracker();
+    updateNodeStates();
+    // Reflect pinned wins on the corkboard for already-cleared games.
+    QUESTS.forEach(function (q) {
+      if (State.completed[q]) addPolaroidPin(q);
+    });
+    // Hub stays active in the background so the back-to-map flow works.
+    hubMap.classList.add('active');
+    hubMap.classList.add('fade-in');
+    digicam.classList.add('active');
+    positionPlaneAtHome();
+    showMinigame(game);
+  }
+}
+applyDevSceneFromUrl();
