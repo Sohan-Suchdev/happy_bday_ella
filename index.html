@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Ella's Bday Adventure — Prototype</title>
+<title>Ella's Bday Adventure</title>
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -35,7 +35,7 @@
       <h1 class="title-text">ELLA'S BDAY<br/>ADVENTURE</h1>
       <div class="title-subtitle">— a 19th birthday quest —</div>
       <button id="start-button" class="start-button">[ PRESS START ]</button>
-      <div class="title-credit">PROTOTYPE BUILD · OPERATION 19</div>
+      <div class="title-credit">OPERATION 19</div>
     </div>
 
     <div class="title-art title-art-right">
@@ -82,6 +82,13 @@
         <g class="continents"><!-- filled by engine.js --></g>
       </svg>
 
+      <!-- Pixel-art pushpins at the 4 corners — make the map look pinned
+           to the corkboard. Purely decorative. -->
+      <img class="map-pin map-pin-tl" src="images/pin.png" alt="" />
+      <img class="map-pin map-pin-tr" src="images/pin.png" alt="" />
+      <img class="map-pin map-pin-bl" src="images/pin.png" alt="" />
+      <img class="map-pin map-pin-br" src="images/pin.png" alt="" />
+
       <!-- ════════════════════════════════════════════════════════════
            MAP PIN POSITIONS — MANUAL TWEAKS
            ════════════════════════════════════════════════════════════
@@ -99,37 +106,37 @@
            painted countries underneath. Only touch the inline
            top/left values — leave the data-id alone.
            ════════════════════════════════════════════════════════════ -->
-      <div class="node" data-id="england" style="top: 40%; left: 42%;">
+      <div class="node" data-id="england" style="top: 33%; left: 44%;">
         <div class="node-label">ENGLAND ?</div>
         <div class="check-mark"></div>
         <img class="lock-icon" src="images/lock_icon.png" alt="" />
       </div>
 
-      <div class="node" data-id="greece" style="top: 45%; left: 53%;">
+      <div class="node" data-id="greece" style="top: 41%; left: 49%;">
         <div class="node-label">GREECE</div>
         <div class="check-mark"></div>
         <img class="lock-icon" src="images/lock_icon.png" alt="" />
       </div>
 
-      <div class="node" data-id="morocco" style="top: 48%; left: 44%;">
+      <div class="node" data-id="morocco" style="top: 45%; left: 43%;">
         <div class="node-label">MOROCCO</div>
         <div class="check-mark"></div>
         <img class="lock-icon" src="images/lock_icon.png" alt="" />
       </div>
 
-      <div class="node" data-id="ghana" style="top: 55%; left: 45%;">
+      <div class="node" data-id="ghana" style="top: 58%; left: 43%;">
         <div class="node-label">GHANA</div>
         <div class="check-mark"></div>
         <img class="lock-icon" src="images/lock_icon.png" alt="" />
       </div>
 
-      <div class="node" data-id="korea" style="top: 38%; left: 90%;">
+      <div class="node" data-id="korea" style="top: 42%; left: 72%;">
         <div class="node-label">KOREA</div>
         <div class="check-mark"></div>
         <img class="lock-icon" src="images/lock_icon.png" alt="" />
       </div>
 
-      <div class="node" data-id="nyc" style="top: 45%; left: 23%;">
+      <div class="node" data-id="nyc" style="top: 41%; left: 26%;">
         <div class="node-label">NYC</div>
         <div class="check-mark"></div>
         <img class="lock-icon" src="images/lock_icon.png" alt="" />

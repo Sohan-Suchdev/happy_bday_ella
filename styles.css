@@ -427,17 +427,18 @@ img { image-rendering: pixelated; }
   pointer-events: none;
 }
 .polaroid-pin::before {
-  /* Pinhead at the top of the polaroid */
+  /* Pixel-art pushpin sprite at the top of the polaroid */
   content: '';
   position: absolute;
-  top: -9px;
+  top: -14px;
   left: 50%;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #ff5a8a 0%, #c2003a 70%, #6e001f 100%);
-  box-shadow: 0 3px 4px rgba(0,0,0,0.45);
+  width: 28px;
+  height: 28px;
+  background: url('images/pin.png') no-repeat center / contain;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.55));
   transform: translateX(-50%);
+  image-rendering: pixelated;
+  pointer-events: none;
 }
 .polaroid-pin img {
   /* Real photos — natural aspect ratio, no cropping. The polaroid card
@@ -525,6 +526,23 @@ img { image-rendering: pixelated; }
 .world-map-image[src]:not([src=""]) ~ .world-map {
   display: none;
 }
+
+/* Pixel-art pushpins holding the world map onto the corkboard.
+   Four corners; purely decorative; sized fluid so they scale with
+   the map. */
+.map-pin {
+  position: absolute;
+  width: clamp(34px, 3.8vw, 56px);
+  height: auto;
+  z-index: 21;                /* above the map image, can sit alongside nodes */
+  pointer-events: none;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.5));
+}
+.map-pin-tl { top: -14px; left:  -14px; }
+.map-pin-tr { top: -14px; right: -14px; }
+.map-pin-bl { bottom: -14px; left:  -14px; }
+.map-pin-br { bottom: -14px; right: -14px; }
 
 .world-map {
   width: 100%;
@@ -811,7 +829,12 @@ img { image-rendering: pixelated; }
 .minigame-screen {
   position: absolute;
   inset: 0;
-  background: var(--cream);
+  background-color: var(--cream);          /* fallback if frame image fails */
+  background-image: none;                   /* overridden per-location below */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;               /* preserve crisp pixel art */
   display: none;
   flex-direction: column;
   align-items: center;
@@ -821,6 +844,15 @@ img { image-rendering: pixelated; }
   padding: 20px;
 }
 .minigame-screen.active { display: flex; }
+
+/* Per-location frame backdrops. The image fills the viewport;
+   the centered .minigame-stage sits on top of it. */
+.minigame-screen[data-location="greece"]  { background-image: url('backgrounds/frame_greece.png'); }
+.minigame-screen[data-location="ghana"]   { background-image: url('backgrounds/frame_ghana.png'); }
+.minigame-screen[data-location="korea"]   { background-image: url('backgrounds/frame_korea.png'); }
+.minigame-screen[data-location="morocco"] { background-image: url('backgrounds/frame_morocco.png'); }
+.minigame-screen[data-location="nyc"]     { background-image: url('backgrounds/frame_nyc.png'); }
+.minigame-screen[data-location="england"] { background-image: url('backgrounds/frame_england.png'); }
 
 .minigame-title {
   font-family: 'Press Start 2P', monospace;
@@ -843,13 +875,22 @@ img { image-rendering: pixelated; }
 .minigame-stage {
   width: min(820px, 86vw);
   min-height: 560px;
-  background: rgba(255, 255, 255, 0.5);
+  max-height: calc(100vh - 180px);          /* bounded so the win-view can
+                                               overflow-y: auto cleanly */
+  background: var(--cream);                 /* fully opaque now that the
+                                               minigame-screen has its own
+                                               frame backdrop behind */
   border: 4px solid var(--dialogue-border);
-  box-shadow: 6px 6px 0 var(--dialogue-border);
+  box-shadow:
+    6px 6px 0 var(--dialogue-border),
+    0 0 0 1px rgba(0, 0, 0, 0.15),
+    0 12px 32px rgba(0, 0, 0, 0.35);        /* lift the stage off the frame */
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
+  image-rendering: auto;                    /* override pixelated from parent
+                                               so game elements aren't blurry */
 }
 
 .minigame-actions { display: flex; gap: 18px; }
@@ -876,6 +917,28 @@ img { image-rendering: pixelated; }
   filter: brightness(0.95);
 }
 .btn.btn-pink { background: var(--neon-pink); color: #fff; }
+
+/* Pulsing highlight for the back button after a win, so the player
+   notices they need to click it to claim the reward and continue. */
+.btn.btn-pulse {
+  background: var(--neon-pink);
+  color: #fff;
+  animation: btn-pulse-glow 1.1s ease-in-out infinite;
+}
+@keyframes btn-pulse-glow {
+  0%, 100% {
+    box-shadow:
+      4px 4px 0 var(--dialogue-border),
+      0 0 0 0 rgba(255, 0, 127, 0.7);
+    transform: translate(0, 0);
+  }
+  50% {
+    box-shadow:
+      5px 5px 0 var(--dialogue-border),
+      0 0 24px 8px rgba(255, 0, 127, 0.5);
+    transform: translate(-1px, -1px);
+  }
+}
 
 /* ====================================================================
    PRE-GAME INTRO (plane fly-in + cat reveal, ~2.2s, click to skip)
@@ -1933,14 +1996,39 @@ img { image-rendering: pixelated; }
    WIN / LOSE VIEWS (shared, replaces the stage on win/lose)
 ==================================================================== */
 .win-view, .lose-view {
-  flex: 1;
+  flex: 1 1 auto;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;     /* anchor to top so the banner is always
+                                      visible; if content overflows, the
+                                      reward icon at the bottom becomes
+                                      reachable via scroll */
   gap: 14px;
-  padding: 18px;
+  padding: 18px 18px 28px;
   position: relative;
+  /* Scroll the rewards screen if content exceeds the stage height.
+     overflow-y: auto only puts a scrollbar on the win/lose view itself —
+     the rest of the page stays untouched. */
+  overflow-y: auto;
+  min-height: 0;                   /* lets flex item actually shrink so the
+                                      overflow + scroll kicks in */
+  scrollbar-width: thin;
+  scrollbar-color: var(--neon-pink) transparent;
+}
+.win-view::-webkit-scrollbar,
+.lose-view::-webkit-scrollbar {
+  width: 8px;
+}
+.win-view::-webkit-scrollbar-thumb,
+.lose-view::-webkit-scrollbar-thumb {
+  background: var(--neon-pink);
+  border-radius: 4px;
+}
+.win-view::-webkit-scrollbar-track,
+.lose-view::-webkit-scrollbar-track {
+  background: transparent;
 }
 .win-banner, .lose-banner {
   width: min(420px, 70%);

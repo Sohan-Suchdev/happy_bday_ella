@@ -590,6 +590,12 @@ function showMinigame(id) {
   hubMap.classList.remove('active');
   hubMap.classList.remove('fade-in');
   minigameScreen.classList.add('active');
+  // Tag with the location id so CSS can swap in the right frame backdrop.
+  minigameScreen.dataset.location = id;
+  // Reset the back button look (in case a prior win left it pulsing)
+  backButton.classList.remove('btn-pulse');
+  backButton.textContent = '[ BACK TO MAP ]';
+  pendingWinExit = null;
 
   var meta = QUEST_META[id];
   minigameTitle.textContent = meta.title;
@@ -684,13 +690,33 @@ function showInstructionScreen(id, aborted, onStart) {
   });
 }
 
+/* When the player wins a game, winLocation() arms this with the
+   exit-to-hub sequence (wipe + drop polaroid + unlock anims). The back
+   button picks it up on the next click instead of doing the plain
+   "abort" flow, so the polaroid still drops and the next location
+   still unlocks. */
+var pendingWinExit = null;
+
 backButton.addEventListener('click', function () {
   if (State.busy) return;
   State.busy = true;
+
+  // Win exit (after a victory): run the armed callback, then reset button
+  if (pendingWinExit) {
+    var exit = pendingWinExit;
+    pendingWinExit = null;
+    backButton.classList.remove('btn-pulse');
+    backButton.textContent = '[ BACK TO MAP ]';
+    exit();
+    return;
+  }
+
+  // Normal abort: aborts a game in progress, no completion side-effects.
   if (activeCleanup) { try { activeCleanup(); } catch (e) {} activeCleanup = null; }
   doWipe(function () {
     minigameScreen.classList.remove('active');
     minigameStage.innerHTML = '';
+    delete minigameScreen.dataset.location;
     hubMap.classList.add('active');
     requestAnimationFrame(function () { hubMap.classList.add('fade-in'); });
     positionPlaneAtHome();
@@ -759,20 +785,30 @@ function winLocation(id) {
 
   State.busy = true;
   startDialogue(victoryLines, function () {
-    State.busy = true;
-    doWipe(function () {
-      minigameScreen.classList.remove('active');
-      minigameStage.innerHTML = '';
-      hubMap.classList.add('active');
-      requestAnimationFrame(function () { hubMap.classList.add('fade-in'); });
-      positionPlaneAtHome();
-      State.busy = false;
-      // Drop the polaroid for the location we just won (with fade-in)
-      addPolaroidPin(id);
-      // Play deferred lock-unlock animations once the map is back in view
-      playPendingUnlockAnims();
-      maybeUnlockEngland();
-    });
+    // No more auto-wipe — let the player linger on the reward view and
+    // click BACK TO MAP themselves when ready. We arm a "win-exit" hook
+    // that the back button picks up next time it's clicked.
+    State.busy = false;
+    pendingWinExit = function () {
+      doWipe(function () {
+        minigameScreen.classList.remove('active');
+        minigameStage.innerHTML = '';
+        delete minigameScreen.dataset.location;
+        hubMap.classList.add('active');
+        requestAnimationFrame(function () { hubMap.classList.add('fade-in'); });
+        positionPlaneAtHome();
+        State.busy = false;
+        // Drop the polaroid for the location we just won (with fade-in)
+        addPolaroidPin(id);
+        // Play deferred lock-unlock animations once the map is back in view
+        playPendingUnlockAnims();
+        maybeUnlockEngland();
+      });
+    };
+    // Visual cue: highlight the back button so the player notices they
+    // need to click it themselves.
+    backButton.classList.add('btn-pulse');
+    backButton.textContent = '[ TAKE THE REWARD → BACK TO MAP ]';
   });
 }
 

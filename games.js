@@ -470,7 +470,7 @@ Games.ghana = function (stage) {
       // Real bomb art (bomb_icon.png)
       el.innerHTML = imgTag('bomb_icon');
     } else if (item.kind === 'golden') {
-      el.innerHTML = imgTag('golden_item');
+      el.innerHTML = imgTag('gold_ticket');
     } else if (item.kind === 'cat') {
       // Reuse the existing cat_peek sprite as a "bonus cat" drop
       el.innerHTML = imgTag('cat_peek');
@@ -1744,16 +1744,26 @@ Games.england = function (stage) {
     }, 320);
 
     setTimeout(function () {
-      // Per-location victory dialogue + then transition to scene 4
+      // Per-location victory dialogue + then ARM the back button to take
+      // the player to the climax scene. They click when ready (no auto-
+      // transition, so they get to savor the moment).
       var meta = QUEST_META.england;
       startDialogue((meta.victory || []).slice(), function () {
-        State.busy = true;
-        doWipe(function () {
-          minigameScreen.classList.remove('active');
-          minigameStage.innerHTML = '';
-          showScene4();
-          State.busy = false;
-        });
+        State.busy = false;
+        pendingWinExit = function () {
+          doWipe(function () {
+            minigameScreen.classList.remove('active');
+            minigameStage.innerHTML = '';
+            delete minigameScreen.dataset.location;
+            showScene4();
+            State.busy = false;
+          });
+        };
+        var backBtn = document.getElementById('back-button');
+        if (backBtn) {
+          backBtn.classList.add('btn-pulse');
+          backBtn.textContent = '[ TO THE CELEBRATION → ]';
+        }
       });
     }, 1100);
   }
